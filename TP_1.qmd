@@ -2,11 +2,11 @@
 title: "Trabajo Práctico Nº1"
 format: pdf
 echo: FALSE
-messages: FALSE
-warnings: FALSE
+message: FALSE
+warning: FALSE
 ---
 
-```{r}
+```{r Carga de librerias}
 
 
 library(tidyverse)
@@ -14,8 +14,11 @@ library(tidyverse)
 
 
 
-```{r}
+```{r Configuraciones predeterminadas}
 set.seed("18122022")
+
+theme_set(theme_bw())
+
 ```
 
 
@@ -31,11 +34,52 @@ for (i in 1:n) {
 promedio_ganancias <- sum(ganancias)/n
 
 
-as.data.frame(ganancias) %>% ggplot() + geom_histogram(aes(x = ganancias), bins = 61, fill = "dodgerblue3") + labs(x = "Ganancias", y = "Conteo") + theme_bw()
+as.data.frame(ganancias) %>% ggplot() + geom_histogram(aes(x = ganancias), bins = 59, fill = "dodgerblue3") + labs(x = "Ganancias", y = "Conteo") + 
+  geom_hline(yintercept = 0, color = "black", size = 1)
+
+
+# Problema: los la longitud de las barras cambia segun bins y segun el espacio que tiene para graficarse
+
 ```
 
 
+# Estrategias
 
+
+## Prior para \theta
+```{r}
+thetas <- seq(0,1,length.out = 1000)
+prior <- dbeta(thetas,2,2)
+
+
+data.frame(thetas, prior) %>% ggplot() + geom_line(aes(x = thetas, y = prior), color = "dodgerblue4", linewidth = 1.5) + labs(x = expression(theta), y = "Probabilidad") +
+  geom_hline(yintercept = 0, color = "black", size = 1) +
+  geom_vline(xintercept = 0, color = "black", size = 1)
+```
+
+```{r}
+
+al_azar <- function() {
+  
+  azar <- runif(1,min = 0,max = 3)
+  
+  maquina <- case_when(azar < 1 ~ "A",
+                       azar < 2 ~ "B",
+                       azar < 3 ~ "C")
+  
+  maquina
+}
+  
+
+# simulacion <- function(metodo) {
+#   
+#   
+#   
+#   
+# }
+
+
+```
 
 
 
