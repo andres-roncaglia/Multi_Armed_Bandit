@@ -64,14 +64,7 @@ names(prob_reales) <- c("A", "B", "C")
 
 # Metodo al azar
 al_azar <- function() {
-  
-  azar <- runif(1,min = 0,max = 3)
-  
-  maquina <- case_when(azar < 1 ~ "A",
-                       azar < 2 ~ "B",
-                       azar < 3 ~ "C")
-  
-  maquina
+  sample(names(prob_reales), 1)
 }
   
 # Lista con las estrategias
@@ -83,6 +76,7 @@ simulacion <- function(metodo) {
   
   ganancias <- NULL
   maquinas <- NULL
+  sim <- NULL
   for (rep in 1:1000) {
     
     ganancia <- numeric(length = 366)
@@ -96,13 +90,25 @@ simulacion <- function(metodo) {
       maquina[dia] <- maquina
       }
     
-    ganancias <- bind_cols(ganancias, ganancia)
-    maquinas <- bind_cols(maquinas, maquina)
+    ganancias <- cbind(ganancias, ganancia)
+    maquinas <- cbind(maquinas, maquina)
     
     }  
+  ganancias <- as_tibble(ganancias)
+  maquinas <- as_tibble(maquinas)
+  
+  colnames(ganancias) <- paste0("Rep_",1:1000)
+  colnames(maquinas) <- paste0("Rep_",1:1000)
+  
+  sim[["Ganancias"]] <- ganancias
+  sim[["Maquinas"]] <- maquinas
+  
+  
+  sim 
   
 }
 
+a <- simulacion("al_azar")
 
 
 ```
