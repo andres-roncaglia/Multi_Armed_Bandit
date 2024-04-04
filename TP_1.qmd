@@ -1,0 +1,41 @@
+---
+title: "Trabajo Práctico Nº1"
+format: pdf
+echo: FALSE
+messages: FALSE
+warnings: FALSE
+---
+
+```{r}
+
+
+library(tidyverse)
+```
+
+
+
+```{r}
+set.seed("18122022")
+```
+
+
+```{r}
+
+n <- 1000
+
+ganancias <- NULL
+for (i in 1:n) {
+  ganancias[i] <- sum(rbinom(366, size = 1, prob = 0.55))
+}
+
+promedio_ganancias <- sum(ganancias)/n
+
+
+as.data.frame(ganancias) %>% ggplot() + geom_histogram(aes(x = ganancias), bins = 61, fill = "dodgerblue3") + labs(x = "Ganancias", y = "Conteo") + theme_bw()
+```
+
+
+
+
+
+
