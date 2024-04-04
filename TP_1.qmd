@@ -58,7 +58,11 @@ data.frame(thetas, prior) %>% ggplot() + geom_line(aes(x = thetas, y = prior), c
 ```
 
 ```{r}
+# Probabilidades reales de ganar en las maquinas
+prob_reales <- c(0.3, 0.55, 0.45)
+names(prob_reales) <- c("A", "B", "C")
 
+# Metodo al azar
 al_azar <- function() {
   
   azar <- runif(1,min = 0,max = 3)
@@ -70,13 +74,35 @@ al_azar <- function() {
   maquina
 }
   
+# Lista con las estrategias
+estrategias <- list(al_azar = al_azar)
 
-# simulacion <- function(metodo) {
-#   
-#   
-#   
-#   
-# }
+
+# Simulacion de mil corridas de los 366 dias
+simulacion <- function(metodo) {
+  
+  ganancias <- NULL
+  maquinas <- NULL
+  for (rep in 1:1000) {
+    
+    ganancia <- numeric(length = 366)
+    maquina <- numeric(length = 366)
+    for (dia in 1:366) {
+      
+      maquina <- estrategias[[metodo]]()
+      
+      ganancia[dia] <- rbinom(1, size = 1, prob = prob_reales[maquina])
+      
+      maquina[dia] <- maquina
+      }
+    
+    ganancias <- bind_cols(ganancias, ganancia)
+    maquinas <- bind_cols(maquinas, maquina)
+    
+    }  
+  
+}
+
 
 
 ```
