@@ -83,11 +83,11 @@ simulacion <- function(metodo) {
     maquina <- numeric(length = 366)
     for (dia in 1:366) {
       
-      maquina <- estrategias[[metodo]]()
+      maquina_dia <- estrategias[[metodo]]()
       
-      ganancia[dia] <- rbinom(1, size = 1, prob = prob_reales[maquina])
+      ganancia[dia] <- rbinom(1, size = 1, prob = prob_reales[maquina_dia])
       
-      maquina[dia] <- maquina
+      maquina[dia] <- maquina_dia
       }
     
     ganancias <- cbind(ganancias, ganancia)
@@ -110,7 +110,7 @@ simulacion <- function(metodo) {
 
 a <- simulacion("al_azar")
 
-
+a
 ```
 
 
