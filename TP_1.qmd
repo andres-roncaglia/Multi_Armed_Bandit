@@ -58,9 +58,11 @@ data.frame(thetas, prior) %>% ggplot() + geom_line(aes(x = thetas, y = prior), c
 ```
 
 ```{r}
-source()
+source("Estrategias_y_simulacion.R")
 
-a <- simulacion("gcpp", 30)
+a <- simulacion("e_greedy", 30, 0.2)
+
+
 ```
 
 
