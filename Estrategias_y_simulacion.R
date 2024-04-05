@@ -125,9 +125,40 @@ e_greedy <- function(maquina, ganancia, e) {
 }
 
 
+softmax <- function(maquina, ganancia, e) {
+  
+  # Las tazas son 0 en la primera iteracion
+  tasa <- numeric(3)
+  
+  # Cuando una maquina no se usa ni una vez, la tasa va a seguir siendo 0
+  # Cuando se juegue al menos una vez su tasa será el numero de veces que gano en la maquina
+  # dividido la cantidad de veces que jugo con la maquina
+  if (sum(maquina == "A") > 0) {
+    tasa[1] <- sum(ganancia[maquina == "A"])/sum(maquina == "A")
+  }
+  if (sum(maquina == "B") > 0) {
+    tasa[2] <- sum(ganancia[maquina == "B"])/sum(maquina == "B")
+  }
+  if (sum(maquina == "C") > 0) {
+    tasa[3] <- sum(ganancia[maquina == "C"])/sum(maquina == "C")
+  }
+  
+  # Se asigna el nombre de la maquina para cada tasa
+  names(tasa) <- c("A","B","C")
+  
+  # Verifica cual es la tasa mas alta y la elige, si hay una sola elige la maquina a la cual le
+  # pertenezca esa tasa, si hay varias maquinas con la misma tasa elige una al azar entre las 
+  # que tengan la mayor tasa
+  
+  probs <- exp(tasa/e)/sum(exp(tasa/e))
+  
+  return(sample(names(tasa),size = 1,prob = probs))
+}
+
+
 
 # Lista con las estrategias
-estrategias <- list(al_azar = al_azar, gcto = gcto, gcpp = gcpp, e_greedy = e_greedy)
+estrategias <- list(al_azar = al_azar, gcto = gcto, gcpp = gcpp, e_greedy = e_greedy, softmax = softmax)
 
 
 # Simulacion de mil corridas de los 366 dias
