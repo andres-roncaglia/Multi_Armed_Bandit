@@ -132,3 +132,8 @@ data.frame(Maquina = rep(c("A", "B", "C"), times = 2),
 #COmentario de prueba para ver que pasa con el commit
 ```
 
+
+
+# Técnica completamente al azar
+
+
