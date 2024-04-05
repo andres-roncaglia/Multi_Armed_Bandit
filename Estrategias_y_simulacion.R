@@ -188,7 +188,12 @@ thompson <- function(maquina, ganancia, param) {
 
 
 # Lista con las estrategias
-estrategias <- list(al_azar = al_azar, gcto = gcto, gcpp = gcpp, e_greedy = e_greedy, softmax = softmax)
+estrategias <- list(al_azar = al_azar, 
+                    gcto = gcto, 
+                    gcpp = gcpp, 
+                    e_greedy = e_greedy, 
+                    softmax = softmax,
+                    thompson = thompson)
 
 
 # Simulacion de mil corridas de los 366 dias
