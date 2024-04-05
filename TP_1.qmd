@@ -71,9 +71,32 @@ tibble(thetas, prior) |>
 ```{r}
 source("Estrategias_y_simulacion.R")
 
-a <- simulacion("upper_bound", 30, 0.05)
+a <- simulacion("al_azar", 1, 0.05)
 
-a
+df <- data.frame(ganancias = a$Ganancias,
+                 maquinas = a$Maquinas) |> 
+  rename(Ganancias = Rep_1, Maquinas = Rep_1.1)
+
+medidas <- df |>
+  group_by(Maquinas) |> 
+  summarise(Tiradas = n(),
+            Exitos = sum(Ganancias))
+
+# Parametros de las distribuciones a posteriori y distribuciones a posterior
+posterior <- matrix(nrow = 1000, ncol = 3)
+for(i in 1:3) {
+  a <- 2 + sum(medidas$Exitos[i]); b <- 2 + sum(medidas$Tiradas[i]) - sum(medidas$Exitos[i])
+  posterior[, i] <- dbeta(thetas, a, b)
+}
+
+colnames(posterior) <- paste("Posterior", sep = "_",c("A", "B", "C"))
+
+# Grafico
+
+data.frame(x = rep(thetas, 3),
+           y = c(posterior[,1], posterior[,2], posterior[,3]),
+           distribucion = rep(c("Maquina A", "Maquina B", "Maquina C"), each = length(thetas)))
+
 ```
 
 
