@@ -71,9 +71,9 @@ tibble(thetas, prior) |>
 ```{r}
 source("Estrategias_y_simulacion.R")
 
-a <- simulacion("e_greedy", 30, 0.2)
+a <- simulacion("upper_bound", 30, 0.05)
 
-
+a
 ```
 
 

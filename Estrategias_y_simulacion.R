@@ -127,7 +127,7 @@ e_greedy <- function(maquina, ganancia, param) {
 
 softmax <- function(maquina, ganancia, param) {
   
-  # Las tazas son 0 en la primera iteracion
+  # Las tasas son 0 en la primera iteracion
   tasa <- numeric(3)
   
   # Cuando una maquina no se usa ni una vez, la tasa va a seguir siendo 0
@@ -155,6 +155,48 @@ softmax <- function(maquina, ganancia, param) {
   return(sample(names(tasa),size = 1,prob = probs))
 }
 
+  # El valor de temperatura mientras más chico es, más se casa con la maquina que mas gano.
+  # Si el valor de temperatura es grande, le da menos peso a la tasa ganadora de la maquina.
+
+  # Preguntar por el "intervalo de credibilidad Bayesiano"!!!!
+
+UB <- function(maquina, ganancia, param) {
+  
+  # Argumentos de las distribuciones de los parámetros
+  a1 <- 2; b1 <- 2; c1 <- 2; a2 <- 2; b2 <- 2; c2 <- 2
+  
+  if (sum(maquina == "A") > 0) {
+    a1 <- 2 + sum(ganancia[maquina == "A"])
+    a2 <- 2 + abs(sum(ganancia[maquina == "A"] -1))
+  }
+  if (sum(maquina == "B") > 0) {
+    b1 <- 2 + sum(ganancia[maquina == "B"])
+    b2 <- 2 + abs(sum(ganancia[maquina == "B"] -1))
+  }
+  if (sum(maquina == "C") > 0) {
+    c1 <- 2 + sum(ganancia[maquina == "C"])
+    c2 <- 2 + abs(sum(ganancia[maquina == "C"] -1))
+  }
+  
+  # Limite superior de 95% credibilidad (Preguntar el miercoles 10/04)
+  ls <- c(qbeta(1 - param/2, a1, a2), qbeta(1 - param/2, b1, b2), qbeta(1 - param/2, c1, c2))
+  names(ls) <- c("A","B","C")
+  
+  # Para elegir el limite superior mayor
+  if (sum(ls == max(ls)) == 1) {
+    maq <- names(which.max(ls))
+    
+  } else if (sum(ls == max(ls)) == 2) {
+    maq <- sample(names(ls)[ls == max(ls)], size = 1)
+    
+  } else {
+    maq <- sample(names(ls), size = 1)
+    
+  }
+  
+  return(maq)
+}
+
 thompson <- function(maquina, ganancia, param) {
   
   # Argumentos de las distribuciones de los parámetros
@@ -175,7 +217,9 @@ thompson <- function(maquina, ganancia, param) {
   
   
   # Tomo una muestra de cada theta
-  muestras <- c(rgamma(1,a1,rate = a2),rgamma(1,b1,rate = b2), rgamma(1,c1,rate = c2))
+  muestras <- c(rbeta(1, a1, a2),rbeta(1, b1, b2), rbeta(1, c1, c2))
+  # Se podria agregar un parámetro para modificar el tamaño de las muestras y asi ponderar mas a los que tienen
+  # parametros mayores.
   
   names(muestras) <- c("A","B","C")
   # Devuelvo la más grande
@@ -193,11 +237,12 @@ estrategias <- list(al_azar = al_azar,
                     gcpp = gcpp, 
                     e_greedy = e_greedy, 
                     softmax = softmax,
-                    thompson = thompson)
+                    thompson = thompson,
+                    upper_bound = UB)
 
 
 # Simulacion de mil corridas de los 366 dias
-simulacion <- function(metodo, n, param = 0) {
+simulacion <- function(metodo, n, param = 0.2) {
   
   # Creamos los vectores donde guardaremos las ganancias y maquinas de los 366 dias para cada repeticion
   # Creamos tambien una futura lista llamada sim que va a guardar las ganancias y las maquinas usadas en las repeticiones
