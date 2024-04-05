@@ -131,7 +131,7 @@ estrategias <- list(al_azar = al_azar, gcto = gcto, gcpp = gcpp, e_greedy = e_gr
 
 
 # Simulacion de mil corridas de los 366 dias
-simulacion <- function(metodo, n, e) {
+simulacion <- function(metodo, n, e = 0) {
   
   # Creamos los vectores donde guardaremos las ganancias y maquinas de los 366 dias para cada repeticion
   # Creamos tambien una futura lista llamada sim que va a guardar las ganancias y las maquinas usadas en las repeticiones
