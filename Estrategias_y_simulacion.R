@@ -3,14 +3,14 @@ prob_reales <- c(0.3, 0.55, 0.45)
 names(prob_reales) <- c("A", "B", "C")
 
 # Estrategia al azar
-al_azar <- function(maquina, ganancia, e) {
+al_azar <- function(maquina, ganancia, param) {
   # Elige una maquina al azar
   sample(names(prob_reales), 1)
 }
 
 
 # Greedy con tasa observada
-gcto <- function(maquina, ganancia, e) {
+gcto <- function(maquina, ganancia, param) {
   
   # Las tazas son 0 en la primera iteracion
   tasa <- numeric(3)
@@ -47,7 +47,7 @@ gcto <- function(maquina, ganancia, e) {
 
 # Greedy con probabilidad a posteriori
 
-gcpp <- function(maquina, ganancia, e) {
+gcpp <- function(maquina, ganancia, param) {
   
   # Argumentos de las distribuciones de los parámetros
   a1 <- 2; b1 <- 2; c1 <- 2; a2 <- 2; b2 <- 2; c2 <- 2
@@ -82,7 +82,7 @@ gcpp <- function(maquina, ganancia, e) {
 
 # e-Greedy con tasa observada
 
-e_greedy <- function(maquina, ganancia, e) {
+e_greedy <- function(maquina, ganancia, param) {
   
   # Las tazas son 0 en la primera iteracion
   tasa <- numeric(3)
@@ -107,13 +107,13 @@ e_greedy <- function(maquina, ganancia, e) {
   # pertenezca esa tasa, si hay varias maquinas con la misma tasa elige una al azar entre las 
   # que tengan la mayor tasa
   if (sum(tasa == max(tasa)) == 1) {
-    prob <- rep(e/2,3)
-    prob[which.max(tasa)] <- 1-e
+    prob <- rep(param/2,3)
+    prob[which.max(tasa)] <- 1-param
     maq <- sample(names(tasa),size = 1,prob = prob)
     
   } else if (sum(tasa == max(tasa)) == 2) {
-    prob <- rep((1-e)/2,3)
-    prob[which.min(tasa)] <- e
+    prob <- rep((1-param)/2,3)
+    prob[which.min(tasa)] <- param
     maq <- sample(names(tasa),size = 1,prob = prob)
     
   } else {
@@ -125,7 +125,7 @@ e_greedy <- function(maquina, ganancia, e) {
 }
 
 
-softmax <- function(maquina, ganancia, e) {
+softmax <- function(maquina, ganancia, param) {
   
   # Las tazas son 0 en la primera iteracion
   tasa <- numeric(3)
@@ -146,14 +146,44 @@ softmax <- function(maquina, ganancia, e) {
   # Se asigna el nombre de la maquina para cada tasa
   names(tasa) <- c("A","B","C")
   
-  # Verifica cual es la tasa mas alta y la elige, si hay una sola elige la maquina a la cual le
-  # pertenezca esa tasa, si hay varias maquinas con la misma tasa elige una al azar entre las 
-  # que tengan la mayor tasa
+  # Calculo las probabilidades en base a las tasas
+  # Como tasa es un vector puedo operar como muestro abajo
+  probs <- exp(tasa/param)/sum(exp(tasa/param))
   
-  probs <- exp(tasa/e)/sum(exp(tasa/e))
+  # Directamente pongo el Sample en el return para eficiencia
   
   return(sample(names(tasa),size = 1,prob = probs))
 }
+
+thompson <- function(maquina, ganancia, param) {
+  
+  # Argumentos de las distribuciones de los parámetros
+  a1 <- 2; b1 <- 2; c1 <- 2; a2 <- 2; b2 <- 2; c2 <- 2
+  
+  if (sum(maquina == "A") > 0) {
+    a1 <- 2 + sum(ganancia[maquina == "A"])
+    a2 <- 2 + abs(sum(ganancia[maquina == "A"] -1))
+  }
+  if (sum(maquina == "B") > 0) {
+    b1 <- 2 + sum(ganancia[maquina == "B"])
+    b2 <- 2 + abs(sum(ganancia[maquina == "B"] -1))
+  }
+  if (sum(maquina == "C") > 0) {
+    c1 <- 2 + sum(ganancia[maquina == "C"])
+    c2 <- 2 + abs(sum(ganancia[maquina == "C"] -1))
+  }
+  
+  
+  # Tomo una muestra de cada theta
+  muestras <- c(rgamma(1,a1,rate = a2),rgamma(1,b1,rate = b2), rgamma(1,c1,rate = c2))
+  
+  names(muestras) <- c("A","B","C")
+  # Devuelvo la más grande
+  
+  return(names(muestras[which.max(muestras)]))
+  
+}
+
 
 
 
@@ -162,7 +192,7 @@ estrategias <- list(al_azar = al_azar, gcto = gcto, gcpp = gcpp, e_greedy = e_gr
 
 
 # Simulacion de mil corridas de los 366 dias
-simulacion <- function(metodo, n, e = 0) {
+simulacion <- function(metodo, n, param = 0) {
   
   # Creamos los vectores donde guardaremos las ganancias y maquinas de los 366 dias para cada repeticion
   # Creamos tambien una futura lista llamada sim que va a guardar las ganancias y las maquinas usadas en las repeticiones
@@ -179,7 +209,7 @@ simulacion <- function(metodo, n, e = 0) {
     for (dia in 1:366) {
       
       # Para cada dia la maquina sera elegida con alguno de las estrategias diseñadas
-      maquina_dia <- estrategias[[metodo]](maquina, ganancia, e)
+      maquina_dia <- estrategias[[metodo]](maquina, ganancia, param)
       
       # una vez elegida la maquina simulamos con una bernoulli con la probabilidad de la maquina
       # y guardamos el resultado
