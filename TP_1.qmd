@@ -71,7 +71,7 @@ tibble(thetas, prior) |>
 ```{r}
 source("Estrategias_y_simulacion.R")
 
-a <- simulacion("al_azar", 1, 0.05)
+a <- simulacion("e_greedy", 1, 0.2)
 
 df <- data.frame(ganancias = a$Ganancias,
                  maquinas = a$Maquinas) |> 
@@ -83,19 +83,46 @@ medidas <- df |>
             Exitos = sum(Ganancias))
 
 # Parametros de las distribuciones a posteriori y distribuciones a posterior
-posterior <- matrix(nrow = 1000, ncol = 3)
+posterior <- NULL
 for(i in 1:3) {
   a <- 2 + sum(medidas$Exitos[i]); b <- 2 + sum(medidas$Tiradas[i]) - sum(medidas$Exitos[i])
-  posterior[, i] <- dbeta(thetas, a, b)
+  posterior <- c(posterior, dbeta(thetas, a, b))
 }
 
-colnames(posterior) <- paste("Posterior", sep = "_",c("A", "B", "C"))
+df_posteriors <- data.frame(x = thetas,
+                 posterior,
+                 Maquina = rep(c("A","B","C"), each = 1000))
 
-# Grafico
+# Grafico posteriors
 
-data.frame(x = rep(thetas, 3),
-           y = c(posterior[,1], posterior[,2], posterior[,3]),
-           distribucion = rep(c("Maquina A", "Maquina B", "Maquina C"), each = length(thetas)))
+df_posteriors %>% ggplot() + geom_line(aes(x = x, y = posterior, color = Maquina)) +
+  geom_area(aes(x = x, y = posterior, fill = Maquina), alpha = 0.2, position = "identity") +
+  labs(x = expression(theta), y = expression("p(y | " ~ theta ~ ")"))
+
+
+# Grafico ganancias acumuladas
+ganancias_acumuladas <- NULL
+for (i in seq_along(df$Ganancias)) {
+  ganancias_acumuladas[i] <- sum(df$Ganancias[1:i])
+}
+
+
+data.frame(ganancias_acumuladas, Dia = 1:length(ganancias_acumuladas)) %>% 
+  ggplot() + geom_line(aes(x = Dia, y = ganancias_acumuladas), linewidth = 0.1) +
+  scale_y_continuous(breaks = ceiling(seq(0,max(ganancias_acumuladas), length.out = 10))) +
+  geom_vline(xintercept = 0) + 
+  geom_hline(yintercept = 0) + 
+  labs(y = "Ganancias acumuladas")
+
+
+# 
+
+data.frame(Maquina = rep(c("A", "B", "C"), times = 2),
+           Resultado = factor(rep(c("Exito", "Fracaso"), each = 3), levels = c("Exito", "Fracaso")),
+           Cantidad = c(medidas$Exitos, medidas$Tiradas - medidas$Exitos)) %>% 
+  ggplot(aes(fill=Resultado, y=Cantidad, x=Maquina)) + 
+  geom_bar(position="stack", stat="identity")
+
 
 ```
 
