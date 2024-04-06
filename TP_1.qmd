@@ -136,10 +136,13 @@ for (i in seq(df$Ganancias)) {
   ganancias_acumuladas[i] <- sum(df$Ganancias[1:i])
 }
 
+
+
 tibble(ganancias_acumuladas, Dia = 1:length(ganancias_acumuladas)) |>  
   ggplot() + 
   geom_line(aes(x = Dia, y = ganancias_acumuladas), 
-            linewidth = 0.1) +
+            linewidth = 1, color = "#1d35ab") +
+  # Ni idea acá probé cambiarle el color porque me deprime la linea negra esta
   scale_y_continuous(breaks = ceiling(seq(0,max(ganancias_acumuladas),length.out = 10)))+
   geom_vline(xintercept = 0) + 
   geom_hline(yintercept = 0) + 
@@ -154,7 +157,6 @@ tibble(
   ggplot(aes(fill=Resultado, y=Cantidad, x=Maquina)) + 
   geom_bar(position="stack", stat="identity")
 
-
 ```
 
 
@@ -166,5 +168,7 @@ tibble(
 
 
 # Técnica completamente al azar
+
+
 
 
