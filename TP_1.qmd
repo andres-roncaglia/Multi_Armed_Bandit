@@ -71,7 +71,7 @@ tibble(thetas, prior) |>
 ```{r}
 source("Estrategias_y_simulacion.R")
 
-a <- simulacion("gcto", 1, 0.2)
+a <- simulacion("e_greedy", n = 1, param = 0.2)
 
 df <- data.frame(ganancias = a$Ganancias,
                  maquinas = a$Maquinas) |> 

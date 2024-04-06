@@ -3,14 +3,14 @@ prob_reales <- c(0.3, 0.55, 0.45)
 names(prob_reales) <- c("A", "B", "C")
 
 # Estrategia al azar
-al_azar <- function(maquina, ganancia, param) {
+al_azar <- function() {
   # Elige una maquina al azar
   sample(names(prob_reales), 1)
 }
 
 
 # Greedy con tasa observada
-gcto <- function(maquina, ganancia, param) {
+gcto <- function(maquina, ganancia) {
   
   # Las tazas son 0 en la primera iteracion
   tasa <- numeric(3)
@@ -47,7 +47,7 @@ gcto <- function(maquina, ganancia, param) {
 
 # Greedy con probabilidad a posteriori
 
-gcpp <- function(maquina, ganancia, param) {
+gcpp <- function(maquina, ganancia) {
   
   # Argumentos de las distribuciones de los parámetros
   a1 <- 2; b1 <- 2; c1 <- 2; a2 <- 2; b2 <- 2; c2 <- 2
@@ -197,7 +197,7 @@ UB <- function(maquina, ganancia, param) {
   return(maq)
 }
 
-thompson <- function(maquina, ganancia, param) {
+thompson <- function(maquina, ganancia) {
   
   # Argumentos de las distribuciones de los parámetros
   a1 <- 2; b1 <- 2; c1 <- 2; a2 <- 2; b2 <- 2; c2 <- 2
@@ -242,7 +242,7 @@ estrategias <- list(al_azar = al_azar,
 
 
 # Simulacion de mil corridas de los 366 dias
-simulacion <- function(metodo, n, param = 0.2) {
+simulacion <- function(metodo, n = 1, param = 0.2) {
   
   # Creamos los vectores donde guardaremos las ganancias y maquinas de los 366 dias para cada repeticion
   # Creamos tambien una futura lista llamada sim que va a guardar las ganancias y las maquinas usadas en las repeticiones
@@ -259,7 +259,21 @@ simulacion <- function(metodo, n, param = 0.2) {
     for (dia in 1:366) {
       
       # Para cada dia la maquina sera elegida con alguno de las estrategias diseñadas
-      maquina_dia <- estrategias[[metodo]](maquina, ganancia, param)
+      # maquina_dia <- estrategias[[metodo]](maquina, ganancia, param)
+      
+      # Intento de limpiar el codigo
+      argumentos <- switch (metodo,
+                            "al_azar" = list(),
+                            "gcto" = list(maquina, ganancia),
+                            "gcpp" = list(maquina, ganancia),
+                            "e_greedy" = list(maquina, ganancia, param),
+                            "softmax" = list(maquina, ganancia, param),
+                            "thompson" = list(maquina, ganancia),
+                            "upper_bound" = list(maquina, ganancia, param)
+                            )
+      
+      maquina_dia <- do.call(estrategias[[metodo]], argumentos)
+      
       
       # una vez elegida la maquina simulamos con una bernoulli con la probabilidad de la maquina
       # y guardamos el resultado
