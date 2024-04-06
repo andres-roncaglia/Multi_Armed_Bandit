@@ -82,16 +82,35 @@ medidas <- df |>
   summarise(Tiradas = n(),
             Exitos = sum(Ganancias))
 
+if(!("A"%in%medidas$Maquinas)){
+  medidas <- rbind(
+    tibble(Maquinas = "A", Tiradas = 0, Exitos = 0),
+    medidas
+  )
+}
+
+if(!("C"%in%medidas$Maquinas)){
+  medidas <- rbind(
+    medidas,
+    tibble(Maquinas = "C", Tiradas = 0, Exitos = 0)
+  )
+}
+
+if(!("B"%in%medidas$Maquinas)){
+  medidas <- rbind(
+       medidas[1,],
+       tibble(Maquinas = "B", Tiradas = 0, Exitos = 0),
+       medidas[2,]
+     )
+}
+
 # Parametros de las distribuciones a posteriori y distribuciones a posterior
 posterior <- NULL
 for(i in 1:3) {
   
-  if (is.na(medidas$Tiradas[i])) {
-    a <- 2; b <- 2
-  } else {
-    a <- 2 + medidas$Exitos[i]; b <- 2 + medidas$Tiradas[i] - medidas$Exitos[i]
-  }
-  
+  a <- 2 + medidas$Exitos[i]
+  b <- 2 + medidas$Tiradas[i] - medidas$Exitos[i]
+
   posterior <- c(posterior, dbeta(thetas, a, b))
 }
 
@@ -101,31 +120,37 @@ df_posteriors <- data.frame(x = thetas,
 
 # Grafico posteriors
 
-df_posteriors %>% ggplot() + geom_line(aes(x = x, y = posterior, color = Maquina)) +
-  geom_area(aes(x = x, y = posterior, fill = Maquina), alpha = 0.2, position = "identity") +
-  labs(x = expression(theta), y = expression("p(y | " ~ theta ~ ")"))
+df_posteriors |> ggplot()+ 
+  geom_line(aes(x = x, y = posterior, color = Maquina))+
+  geom_area(aes(x = x, y = posterior, fill = Maquina), 
+            alpha = 0.2, position = "identity")+
+  labs(x = expression(theta), 
+       y = expression("p("~ theta ~"|  y )"))
+
 
 
 # Grafico ganancias acumuladas
 ganancias_acumuladas <- NULL
-for (i in seq_along(df$Ganancias)) {
+
+for (i in seq(df$Ganancias)) {
   ganancias_acumuladas[i] <- sum(df$Ganancias[1:i])
 }
 
-
-data.frame(ganancias_acumuladas, Dia = 1:length(ganancias_acumuladas)) %>% 
-  ggplot() + geom_line(aes(x = Dia, y = ganancias_acumuladas), linewidth = 0.1) +
-  scale_y_continuous(breaks = ceiling(seq(0,max(ganancias_acumuladas), length.out = 10))) +
+tibble(ganancias_acumuladas, Dia = 1:length(ganancias_acumuladas)) |>  
+  ggplot() + 
+  geom_line(aes(x = Dia, y = ganancias_acumuladas), 
+            linewidth = 0.1) +
+  scale_y_continuous(breaks = ceiling(seq(0,max(ganancias_acumuladas),length.out = 10)))+
   geom_vline(xintercept = 0) + 
   geom_hline(yintercept = 0) + 
   labs(y = "Ganancias acumuladas")
 
 
-# 
-
-data.frame(Maquina = rep(c("A", "B", "C"), times = 2),
-           Resultado = factor(rep(c("Exito", "Fracaso"), each = 3), levels = c("Exito", "Fracaso")),
-           Cantidad = c(medidas$Exitos, medidas$Tiradas - medidas$Exitos)) %>% 
+tibble(
+  Maquina = rep(c("A", "B", "C"), times = 2),
+  Resultado = factor(rep(c("Exito", "Fracaso"), each = 3), levels = c("Exito", "Fracaso")),
+  Cantidad = c(medidas$Exitos, medidas$Tiradas - medidas$Exitos)
+  )  |>  
   ggplot(aes(fill=Resultado, y=Cantidad, x=Maquina)) + 
   geom_bar(position="stack", stat="identity")
 
