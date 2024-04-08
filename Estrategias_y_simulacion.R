@@ -237,12 +237,25 @@ estrategias <- list(al_azar = al_azar,
                     gcpp = gcpp, 
                     e_greedy = e_greedy, 
                     softmax = softmax,
-                    thompson = thompson,
-                    upper_bound = UB)
+                    upper_bound = UB,
+                    thompson = thompson)
 
 
 # Simulacion de mil corridas de los 366 dias
 simulacion <- function(metodo, n = 1, param = 0.2) {
+  
+  if(!(metodo %in% names(estrategias))){
+    stop("El método introducido no está especificado")
+  }
+  if(n<1 || (n != round(n))){
+    stop("La cantidad de simulaciones debe ser un número natural")
+  }
+  if(metodo == "softmax" && param <= 0){
+    stop("Para el método softmax el parámetro de temperatura debe ser mayor que 0")
+  }
+  if(metodo == "e_greedy" && (param < 0 || param > 1)){
+    stop("Para el método e-greedy el parámetro epsilon debe estar entre 0 y 1")
+  }
   
   # Creamos los vectores donde guardaremos las ganancias y maquinas de los 366 dias para cada repeticion
   # Creamos tambien una futura lista llamada sim que va a guardar las ganancias y las maquinas usadas en las repeticiones
