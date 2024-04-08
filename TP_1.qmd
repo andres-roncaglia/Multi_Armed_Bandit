@@ -1,5 +1,6 @@
 ---
-title: "Trabajo Práctico Nº1"
+title: "La Guía del Apostador"
+subtitle: "Trabajo Práctico Nº1"
 format: pdf
 echo: FALSE
 message: FALSE
@@ -7,12 +8,8 @@ warning: FALSE
 ---
 
 ```{r Carga de librerias}
-
-
 library(tidyverse)
 ```
-
-
 
 ```{r Configuraciones predeterminadas}
 set.seed("18122022")
@@ -21,154 +18,214 @@ theme_set(theme_bw())
 
 ```
 
+# Introducción
 
-```{r}
+En los casinos uno de los juegos más llamativos son las máquinas tragamonedas o tragaperras. También conocido por ser uno de los juegos más adictivos en el mundo de las apuestas y en el cual las personas pierden más dinero. Con el fin de que estas personas pierdan menos dinero se estudiará la eficacia de distintas estrategias de juego. A este problema se lo conoce como "Bandido Multibrazo" (*"Multi armed bandit"*)
 
-n <- 1000
+<!-- ```{r} -->
 
-ganancias <- NULL
-for (i in 1:n) {
-  ganancias[i] <- sum(rbinom(366, size = 1, prob = 0.55))
-}
+<!-- n <- 1000 -->
 
-promedio_ganancias <- sum(ganancias)/n
+<!-- ganancias <- NULL -->
 
+<!-- for (i in 1:n) { -->
 
-tibble(ganancias) |>  
-  ggplot() + 
-  geom_histogram(aes(x = ganancias), 
-                 bins = 30, 
-                 fill = "dodgerblue3",
-                 color = "black") + 
-  labs(x = "Ganancias", y = "Frecuencias") +
-  geom_hline(yintercept = 0, color = "black", size = 0.2)
+<!--   ganancias[i] <- sum(rbinom(366, size = 1, prob = 0.55)) -->
 
+<!-- } -->
 
-# Problema: los la longitud de las barras cambia segun bins y segun el espacio que tiene para graficarse
+<!-- promedio_ganancias <- sum(ganancias)/n -->
 
-```
+<!-- tibble(ganancias) |>   -->
 
+<!--   ggplot() +  -->
 
-# Estrategias
+<!--   geom_histogram(aes(x = ganancias),  -->
 
+<!--                  bins = 30,  -->
 
-## Prior para \theta
-```{r}
-thetas <- seq(0,1,length.out = 1000)
-prior <- dbeta(thetas,2,2)
+<!--                  fill = "dodgerblue3", -->
 
+<!--                  color = "black") +  -->
 
-tibble(thetas, prior) |>  
-  ggplot() + 
-  geom_line(aes(x = thetas, y = prior), 
-            color = "dodgerblue4", 
-            linewidth = 1) + 
-  labs(x = expression(theta), y = "Probabilidad") +
-  geom_hline(yintercept = 0, color = "black", size = 0.2) +
-  geom_vline(xintercept = 0, color = "black", size = 0.2)
-```
+<!--   labs(x = "Ganancias", y = "Frecuencias") + -->
 
-```{r}
-source("Estrategias_y_simulacion.R")
+<!--   geom_hline(yintercept = 0, color = "black", size = 0.2) -->
 
-a <- simulacion("e_greedy", n = 1, param = 0.2)
+<!-- # Problema: los la longitud de las barras cambia segun bins y segun el espacio que tiene para graficarse -->
 
-df <- data.frame(ganancias = a$Ganancias,
-                 maquinas = a$Maquinas) |> 
-  rename(Ganancias = Rep_1, Maquinas = Rep_1.1)
+<!-- ``` -->
 
-medidas <- df |>
-  group_by(Maquinas) |> 
-  summarise(Tiradas = n(),
-            Exitos = sum(Ganancias))
+<!-- # Estrategias -->
 
-if(!("A"%in%medidas$Maquinas)){
-  medidas <- rbind(
-    tibble(Maquinas = "A", Tiradas = 0, Exitos = 0),
-    medidas
-  )
-}
+<!-- ## Prior para \theta -->
 
-if(!("C"%in%medidas$Maquinas)){
-  medidas <- rbind(
-    medidas,
-    tibble(Maquinas = "C", Tiradas = 0, Exitos = 0)
-  )
-}
+<!-- ```{r} -->
 
-if(!("B"%in%medidas$Maquinas)){
-  medidas <- rbind(
-       medidas[1,],
-       tibble(Maquinas = "B", Tiradas = 0, Exitos = 0),
-       medidas[2,]
-     )
-}
+<!-- thetas <- seq(0,1,length.out = 1000) -->
 
-# Parametros de las distribuciones a posteriori y distribuciones a posterior
-posterior <- NULL
-for(i in 1:3) {
-  
-  a <- 2 + medidas$Exitos[i]
-  b <- 2 + medidas$Tiradas[i] - medidas$Exitos[i]
+<!-- prior <- dbeta(thetas,2,2) -->
 
-  posterior <- c(posterior, dbeta(thetas, a, b))
-}
+<!-- tibble(thetas, prior) |>   -->
 
-df_posteriors <- data.frame(x = thetas,
-                 posterior,
-                 Maquina = rep(c("A","B","C"), each = 1000))
+<!--   ggplot() +  -->
 
-# Grafico posteriors
+<!--   geom_line(aes(x = thetas, y = prior),  -->
 
-df_posteriors |> ggplot()+ 
-  geom_line(aes(x = x, y = posterior, color = Maquina))+
-  geom_area(aes(x = x, y = posterior, fill = Maquina), 
-            alpha = 0.2, position = "identity")+
-  labs(x = expression(theta), 
-       y = expression("p("~ theta ~"|  y )"))
+<!--             color = "dodgerblue4",  -->
 
+<!--             linewidth = 1) +  -->
 
+<!--   labs(x = expression(theta), y = "Probabilidad") + -->
 
-# Grafico ganancias acumuladas
-ganancias_acumuladas <- NULL
+<!--   geom_hline(yintercept = 0, color = "black", size = 0.2) + -->
 
-for (i in seq(df$Ganancias)) {
-  ganancias_acumuladas[i] <- sum(df$Ganancias[1:i])
-}
+<!--   geom_vline(xintercept = 0, color = "black", size = 0.2) -->
 
+<!-- ``` -->
 
+<!-- ```{r} -->
 
-tibble(ganancias_acumuladas, Dia = 1:length(ganancias_acumuladas)) |>  
-  ggplot() + 
-  geom_line(aes(x = Dia, y = ganancias_acumuladas), 
-            linewidth = 1, color = "#1d35ab") +
-  # Ni idea acá probé cambiarle el color porque me deprime la linea negra esta
-  scale_y_continuous(breaks = ceiling(seq(0,max(ganancias_acumuladas),length.out = 10)))+
-  geom_vline(xintercept = 0) + 
-  geom_hline(yintercept = 0) + 
-  labs(y = "Ganancias acumuladas")
+<!-- source("Estrategias_y_simulacion.R") -->
 
+<!-- a <- simulacion("e_greedy", n = 1, param = 0.2) -->
 
-tibble(
-  Maquina = rep(c("A", "B", "C"), times = 2),
-  Resultado = factor(rep(c("Exito", "Fracaso"), each = 3), levels = c("Exito", "Fracaso")),
-  Cantidad = c(medidas$Exitos, medidas$Tiradas - medidas$Exitos)
-  )  |>  
-  ggplot(aes(fill=Resultado, y=Cantidad, x=Maquina)) + 
-  geom_bar(position="stack", stat="identity")
+<!-- df <- data.frame(ganancias = a$Ganancias, -->
 
-```
+<!--                  maquinas = a$Maquinas) |>  -->
 
+<!--   rename(Ganancias = Rep_1, Maquinas = Rep_1.1) -->
 
+<!-- medidas <- df |> -->
 
-```{r}
-#COmentario de prueba para ver que pasa con el commit
-```
+<!--   group_by(Maquinas) |>  -->
 
+<!--   summarise(Tiradas = n(), -->
 
+<!--             Exitos = sum(Ganancias)) -->
 
-# Técnica completamente al azar
+<!-- if(!("A"%in%medidas$Maquinas)){ -->
 
+<!--   medidas <- rbind( -->
 
+<!--     tibble(Maquinas = "A", Tiradas = 0, Exitos = 0), -->
 
+<!--     medidas -->
 
+<!--   ) -->
+
+<!-- } -->
+
+<!-- if(!("C"%in%medidas$Maquinas)){ -->
+
+<!--   medidas <- rbind( -->
+
+<!--     medidas, -->
+
+<!--     tibble(Maquinas = "C", Tiradas = 0, Exitos = 0) -->
+
+<!--   ) -->
+
+<!-- } -->
+
+<!-- if(!("B"%in%medidas$Maquinas)){ -->
+
+<!--   medidas <- rbind( -->
+
+<!--        medidas[1,], -->
+
+<!--        tibble(Maquinas = "B", Tiradas = 0, Exitos = 0), -->
+
+<!--        medidas[2,] -->
+
+<!--      ) -->
+
+<!-- } -->
+
+<!-- # Parametros de las distribuciones a posteriori y distribuciones a posterior -->
+
+<!-- posterior <- NULL -->
+
+<!-- for(i in 1:3) { -->
+
+<!--   a <- 2 + medidas$Exitos[i] -->
+
+<!--   b <- 2 + medidas$Tiradas[i] - medidas$Exitos[i] -->
+
+<!--   posterior <- c(posterior, dbeta(thetas, a, b)) -->
+
+<!-- } -->
+
+<!-- df_posteriors <- data.frame(x = thetas, -->
+
+<!--                  posterior, -->
+
+<!--                  Maquina = rep(c("A","B","C"), each = 1000)) -->
+
+<!-- # Grafico posteriors -->
+
+<!-- df_posteriors |> ggplot()+  -->
+
+<!--   geom_line(aes(x = x, y = posterior, color = Maquina))+ -->
+
+<!--   geom_area(aes(x = x, y = posterior, fill = Maquina),  -->
+
+<!--             alpha = 0.2, position = "identity")+ -->
+
+<!--   labs(x = expression(theta),  -->
+
+<!--        y = expression("p("~ theta ~"|  y )")) -->
+
+<!-- # Grafico ganancias acumuladas -->
+
+<!-- ganancias_acumuladas <- NULL -->
+
+<!-- for (i in seq(df$Ganancias)) { -->
+
+<!--   ganancias_acumuladas[i] <- sum(df$Ganancias[1:i]) -->
+
+<!-- } -->
+
+<!-- tibble(ganancias_acumuladas, Dia = 1:length(ganancias_acumuladas)) |>   -->
+
+<!--   ggplot() +  -->
+
+<!--   geom_line(aes(x = Dia, y = ganancias_acumuladas),  -->
+
+<!--             linewidth = 1, color = "#1d35ab") + -->
+
+<!--   # Ni idea acá probé cambiarle el color porque me deprime la linea negra esta -->
+
+<!--   scale_y_continuous(breaks = ceiling(seq(0,max(ganancias_acumuladas),length.out = 10)))+ -->
+
+<!--   geom_vline(xintercept = 0) +  -->
+
+<!--   geom_hline(yintercept = 0) +  -->
+
+<!--   labs(y = "Ganancias acumuladas") -->
+
+<!-- tibble( -->
+
+<!--   Maquina = rep(c("A", "B", "C"), times = 2), -->
+
+<!--   Resultado = factor(rep(c("Exito", "Fracaso"), each = 3), levels = c("Exito", "Fracaso")), -->
+
+<!--   Cantidad = c(medidas$Exitos, medidas$Tiradas - medidas$Exitos) -->
+
+<!--   )  |>   -->
+
+<!--   ggplot(aes(fill=Resultado, y=Cantidad, x=Maquina)) +  -->
+
+<!--   geom_bar(position="stack", stat="identity") -->
+
+<!-- ``` -->
+
+<!-- ```{r} -->
+
+<!-- #COmentario de prueba para ver que pasa con el commit -->
+
+<!-- ``` -->
+
+<!-- # Técnica completamente al azar -->
+
+<!-- Esta estrategia consiste en elegir cada día una máquina al azar -->
