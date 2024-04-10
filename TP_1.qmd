@@ -35,6 +35,8 @@ theme_set(theme_bw())
 
 En los casinos uno de los juegos más llamativos son las máquinas tragamonedas o tragaperras. También conocido por ser uno de los juegos más adictivos en el mundo de las apuestas y en el cual las personas pierden más dinero. Con el fin de que estas personas pierdan menos dinero se estudiará la eficacia de distintas estrategias de juego. A este problema se lo conoce como "Bandido Multibrazo" (*Multi armed bandit*).
 
+La principal incógnita se encuentra en descubrir hasta que punto conviene "explotar" por sobre "explorar" o viceversa. Explotar refiere a dar prioridad a elegir lo que sabemos que funciona, mientras que explorar refiere a ser propenso a salir de la "zona de confort" y buscar nuevas alternativas.
+
 # Metodología
 
 Se plantea que se tienen 3 máquinas tragamonedas con distintas probabilidades de ganar una unidad monetaria, las cuales son:
@@ -127,18 +129,29 @@ source("Estrategias_y_simulacion.R")
 
 ### Completamente al azar
 
-Consiste en elegir cada día una máquina cualquiera sin importar los resultados que se hayan obtenido en el día anterior.
+Consiste en elegir cada día una máquina cualquiera sin importar los resultados que se hayan obtenido en el día anterior. Esta estrategia se concentra únicamente en "explorar" pero nunca considera "explotar" como una posibilidad.
 
 Para elegir la máquina que se va a jugar en el día se hizo uso de la siguiente función:
 
 ::: {.callout-note}
 ## Función al_azar
 
+```{r funcion al azar, echo=TRUE, eval=FALSE}
+
+# Estrategia al azar
+al_azar <- function() {
+  # Elige una maquina al azar
+  sample(names(prob_reales), 1)
+}
+
+```
+
+
 :::
 
 Simulando los 366 días de juego:
 
-```{r}
+```{r sim al azar}
 sim <- simulacion("al_azar", n = 1)
 
 salida <- salidas(sim)
@@ -146,13 +159,13 @@ salida <- salidas(sim)
 
 ```
 
-```{r}
+```{r al azar grafico_ganancias_acumuladas}
 salida$grafico_ganancias_acumuladas
 ```
 
 Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
 
-```{r}
+```{r al azar grafico_barplot}
 salida$grafico_barplot
 
 maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n = sum(Cantidad)) |> filter(n == max(n)) |> select(Maquina) |> as.character() 
@@ -162,7 +175,7 @@ maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n =
 `r ifelse(length(maquina_mas_jugada) == 1, paste("La máquina más jugada fue la", maquina_mas_jugada) ,paste("Las máquinas más jugadas fueron las", paste(maquina_mas_jugada, collapse = " y ")))`
 
 
-```{r}
+```{r al azar grafico_posteriors}
 salida$grafico_posteriors
 ```
 
@@ -179,24 +192,61 @@ Desventajas de la estrategia:
 
 ### Greedy con tasa observada
 
-La máquina con la que se juega será la que tenga la mayor tasa de éxito hasta el momento  
+La máquina con la que se juega será la que tenga la mayor tasa de éxito hasta el dia en que se juega. Esta estrategia se concentra demasiado en "explotar" y casi nada en "explorar".
 
 Para elegir la máquina que se va a jugar en el día se hizo uso de la siguiente función:
 
 ::: {.callout-note}
 ## Función gcto
 
-```{r}
-getFunction(name = "al_azar")
+```{r funcion gcto, echo=TRUE, eval=FALSE}
+
+
+# Greedy con tasa observada
+gcto <- function(maquina, ganancia) {
+  
+  # Las tazas son 0 en la primera iteracion
+  tasa <- numeric(3)
+  
+  
+  # Cuando una maquina no se usa ni una vez, la tasa va a seguir siendo 0
+  # Cuando se juegue al menos una vez su tasa será el numero de veces que gano 
+  # en la maquina dividido la cantidad de veces que jugo con la maquina
+  if (sum(maquina == "A") > 0) {
+    tasa[1] <- sum(ganancia[maquina == "A"])/sum(maquina == "A")
+  }
+  if (sum(maquina == "B") > 0) {
+    tasa[2] <- sum(ganancia[maquina == "B"])/sum(maquina == "B")
+  }
+  if (sum(maquina == "C") > 0) {
+    tasa[3] <- sum(ganancia[maquina == "C"])/sum(maquina == "C")
+  }
+  
+  # Se asigna el nombre de la maquina para cada tasa
+  names(tasa) <- c("A","B","C")
+  
+  # Verifica cual es la tasa mas alta y la elige, si hay una sola elige la 
+  # maquina a la cual le pertenezca esa tasa, si hay varias maquinas con la misma 
+  # tasa elige una al azar entre las que tengan la mayor tasa
+  
+  if (sum(tasa == max(tasa)) == 1) {
+    maq <- names(tasa[which.max(tasa)])
+  } else {
+    maq <- sample(names(tasa[tasa == max(tasa)]), size = 1)
+  }
+  
+  return(maq)
+}
+
+
 
 ```
-
-
 :::
+
 
 Simulando los 366 días de juego:
 
-```{r}
+```{r sim gcto}
 sim <- simulacion("gcto", n = 1)
 
 salida <- salidas(sim)
@@ -204,13 +254,13 @@ salida <- salidas(sim)
 
 ```
 
-```{r}
+```{r gcto grafico_ganancias_acumuladas}
 salida$grafico_ganancias_acumuladas
 ```
 
 Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
 
-```{r}
+```{r gcto grafico_barplot}
 salida$grafico_barplot
 
 maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n = sum(Cantidad)) |> filter(n == max(n)) |> select(Maquina) |> as.character() 
@@ -220,7 +270,7 @@ maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n =
 `r ifelse(length(maquina_mas_jugada) == 1, paste("La máquina más jugada fue la", maquina_mas_jugada) ,paste("Las máquinas más jugadas fueron las", paste(maquina_mas_jugada, collapse = " y ")))`
 
 
-```{r}
+```{r gcto grafico_posteriors}
 salida$grafico_posteriors
 ```
 
@@ -228,8 +278,21 @@ Y así resultan las distribuciones de la probabilidad de éxito en cada máquina
 
 Ventajas de la estrategia:
 
-  - 
+  - En algunos escenarios es posible elegir siempre la mejor máquina.
   
 Desventajas de la estrategia:
 
-  - 
+  - Una vez que se gane con una máquina, se elegirá siempre esa misma.
+  
+  - Es posible elegir explotar la peor máquina.
+
+
+
+
+
+# Cosas a agregar
+
+Nombres a las figuras y titulos a los graficos
+
+Agregar al pdf la funcion simulacion
+
