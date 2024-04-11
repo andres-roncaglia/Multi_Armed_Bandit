@@ -866,3 +866,5 @@ Desventajas de la estrategia:
 Nombres a las figuras y titulos a los graficos
 
 Box-plots/Histogramas con las ganancias anuales de cada maquina para las 1000 repeticiones para compararlas
+
+
