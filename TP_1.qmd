@@ -230,7 +230,7 @@ simulacion <- function(metodo, n = 1, param = 0.2) {
 
 Consiste en elegir cada día una máquina cualquiera sin importar los resultados que se hayan obtenido en el día anterior. Esta estrategia se concentra únicamente en "explorar" pero nunca considera "explotar" como una posibilidad.
 
-Para elegir la máquina que se va a jugar en el día se hizo uso de la siguiente función:
+Para elegir la máquina con la que se va a jugar en el día se hizo uso de la siguiente función:
 
 ::: {.callout-note}
 ## Función al_azar
@@ -296,7 +296,7 @@ Desventajas de la estrategia:
 
 La máquina con la que se juega será la que tenga la mayor tasa de éxito hasta el dia en que se juega. Esta estrategia se concentra demasiado en "explotar" y casi nada en "explorar".
 
-Para elegir la máquina que se va a jugar en el día se hizo uso de la siguiente función:
+Para elegir la máquina con la que se va a jugar en el día se hizo uso de la siguiente función:
 
 ::: {.callout-note}
 ## Función gcto
@@ -394,7 +394,7 @@ Desventajas de la estrategia:
 
 Partiendo de las creencias iniciales, luego de cada tirada y considerando las realizadas hasta el momento, se redefinen las probabilidades de éxito esperadas de cada máquina y se selecciona la mejor. 
 
-Para elegir la máquina que se va a jugar en el día se hizo uso de la siguiente función:
+Para elegir la máquina con la que se va a jugar en el día se hizo uso de la siguiente función:
 
 ::: {.callout-note}
 ## Función gcpp
@@ -487,7 +487,7 @@ Desventajas de la estrategia:
 
 Se selecciona con una probabilidad $1-\epsilon$ la máquina que hasta el momento tenga la mayor tasa de éxito observada, y con una probabilidad de $\frac{\epsilon}{2}$ las máquinas restantes. $\epsilon$ es un parámetro de exploración, cuando es igual a $0$ la estrategia es igual a "Greedy con tasa observada", cuando es igual a $1$ es igual a la estrategia "Al azar".
 
-Para elegir la máquina que se va a jugar en el día se hizo uso de la siguiente función:
+Para elegir la máquina con la que se va a jugar en el día se hizo uso de la siguiente función:
 
 ::: {.callout-note}
 ## Función e_greedy
@@ -583,9 +583,13 @@ Desventajas de la estrategia:
 \newpage
 ### Softmax
 
+Dada la tasa observada para cada máquina ($\pi_{i}$) y el parámetro de temperatura ($\tau$) definido, se calcula una probabilidad de elegir cada una de estas utilizando la función softmax: 
 
+$$Pr(i) = \frac{e^{\pi_i/\tau}}{\sum_{i = 1}^{3}{e^{\pi_i/\tau}}}$$ 
 
-Para elegir la máquina que se va a jugar en el día se hizo uso de la siguiente función:
+Donde $i$ representa a las máquinas y $\tau$ a diferencia del método $\epsilon$-greedy, en el cual el parámetro determina la probabilidad de explorar o explotar, en este caso determina, de manera inversa, el peso que tendrán las tasas de éxitos observadas hasta el momento de cada máquina al calcular las probabilidades de elegir cada una de estas.
+
+Para elegir la máquina con la que se va a jugar en el día se hizo uso de la siguiente función:
 
 ::: {.callout-note}
 ## Función softmax
@@ -627,6 +631,7 @@ softmax <- function(maquina, ganancia, param) {
 ```
 :::
 
+\newpage
 
 Simulando los 366 días de juego:
 
@@ -662,20 +667,22 @@ Y así resultan las distribuciones de la probabilidad de éxito en cada máquina
 
 Ventajas de la estrategia:
 
-  -
-
+  - Al igual que la estrategia "$\epsilon$-greedy", se le puede asignar valores al parámetro $\tau$ para lograr un equilibrio entre exploración y explotación, y así lograr mayores ganancias.
+  
+  - Hace uso de la información de las tiradas anteriores.
+  
 Desventajas de la estrategia:
 
-  -
+  - Para valores de $\tau$ muy cercanos a cero, se corre el riesgo de sobreexplotar una máquina 
 
-
+  - Cuando $\tau \rightarrow \infty$, la estrategia tiende a elegir máquinas al azar.
 
 \newpage
 ### Upper-Bound
 
-La máquina con la que se juega será la que tenga la mayor tasa de éxito hasta el dia en que se juega. Esta estrategia se concentra demasiado en "explotar" y casi nada en "explorar".
+# Redactar cuando estemos seguros  
 
-Para elegir la máquina que se va a jugar en el día se hizo uso de la siguiente función:
+Para elegir la máquina con la que se va a jugar en el día se hizo uso de la siguiente función:
 
 ::: {.callout-note}
 ## Función UB
@@ -702,8 +709,9 @@ UB <- function(maquina, ganancia, param) {
     c2 <- 2 + abs(sum(ganancia[maquina == "C"] -1))
   }
   
-  # Limite superior de 95% credibilidad (Preguntar el miercoles 10/04)
-  ls <- c(qbeta(1 - param/2, a1, a2), qbeta(1 - param/2, b1, b2), qbeta(1 - param/2, c1, c2))
+  # Limite superior de 95% credibilidad
+  ls <- c(qbeta(1 - param/2, a1, a2), qbeta(1 - param/2, b1, b2),
+          qbeta(1 - param/2, c1, c2))
   names(ls) <- c("A","B","C")
   
   # Para elegir el limite superior mayor
@@ -724,6 +732,7 @@ UB <- function(maquina, ganancia, param) {
 ```
 :::
 
+\newpage 
 
 Simulando los 366 días de juego:
 
@@ -770,9 +779,9 @@ Desventajas de la estrategia:
 \newpage
 ### Thompson
 
-La máquina con la que se juega será la que tenga la mayor tasa de éxito hasta el dia en que se juega. Esta estrategia se concentra demasiado en "explotar" y casi nada en "explorar".
+Se extrae una muestra de la distribución a posteriori de las probabilidades de éxito de cada máquina y se juega con la que se obtenga la muestra más grande.
 
-Para elegir la máquina que se va a jugar en el día se hizo uso de la siguiente función:
+Para elegir la máquina con la que se va a jugar en el día se hizo uso de la siguiente función:
 
 ::: {.callout-note}
 ## Función thompson
@@ -801,8 +810,7 @@ thompson <- function(maquina, ganancia) {
   
   
   # Tomo una muestra de cada theta
-  muestras <- c(rbeta(1, a1, a2),rbeta(1, b1, b2), rbeta(1, c1, c2))
-  # Se podria agregar un parámetro para modificar el tamaño de las muestras y asi ponderar mas a los que tienen
+  muestras <- c(rbeta(1, a1, a2), rbeta(1, b1, b2), rbeta(1, c1, c2))
   # parametros mayores.
   
   names(muestras) <- c("A","B","C")
@@ -811,8 +819,6 @@ thompson <- function(maquina, ganancia) {
   return(names(muestras[which.max(muestras)]))
   
 }
-
-
 ```
 :::
 
@@ -851,7 +857,9 @@ Y así resultan las distribuciones de la probabilidad de éxito en cada máquina
 
 Ventajas de la estrategia:
 
-  -
+  - Utiliza la información de las tiradas anteriores
+  
+  - 
 
 Desventajas de la estrategia:
 
@@ -863,7 +871,5 @@ Desventajas de la estrategia:
 # Cosas a agregar
 
 Nombres a las figuras y titulos a los graficos
-
-Agregar al pdf la funcion simulacion
 
 Box-plots/Histogramas con las ganancias anuales de cada maquina para las 1000 repeticiones para compararlas
