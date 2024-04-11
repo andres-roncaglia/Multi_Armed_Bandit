@@ -246,7 +246,7 @@ estrategias <- list(al_azar = al_azar,
                     thompson = thompson)
 
 
-# Simulacion de mil corridas de los 366 dias
+# n simulaciones de los 366 dias, jugando 1 vez por día
 simulacion <- function(metodo, n = 1, param = 0.2) {
   
   if(!(metodo %in% names(estrategias))){

@@ -47,11 +47,34 @@ Se plantea que se tienen 3 máquinas tragamonedas con distintas probabilidades d
 
 Cada día se hará una sola tirada en una máquina que será elegida según la estrategia, durante los 366 días del año 2024, con el objetivo de ganar la mayor cantidad de dinero posible, teniendo en cuenta que no cuesta dinero jugar, es decir, solo podemos ganar dinero.
 
-Se asume además que la creencia inicial de la probabilidad de ganar para cada máquina sigue una distribución $Beta(2,2)$.
+Se asume además que la creencia inicial de la probabilidad de ganar para cada máquina sigue una distribución $Beta(2,2)$, la cual se puede observar a continuación.
+
+```{r prior}
+thetas <- seq(0,1,length.out = 1000)
+
+prior <- dbeta(thetas,2,2)
+
+tibble(thetas, prior) |>
+
+  ggplot() +
+
+  geom_line(aes(x = thetas, y = prior),
+
+            color = "dodgerblue4",
+
+            linewidth = 1) +
+
+  labs(x = expression(theta), y = "Probabilidad") +
+
+  geom_hline(yintercept = 0, color = "black", size = 0.2) +
+
+  geom_vline(xintercept = 0, color = "black", size = 0.2)
+
+```
 
 # Resultados
 
-Para obtener una noción de cuanto se ganaría en promedio en un año de juego con la mejor máquina (máquina B), se simula 1000 veces las ganancias obtenidas en un año.
+Para obtener una noción de cuanto se ganaría en promedio en un año de juego con la mejor máquina (máquina B), se simulan 1000 secuencias de 366 juegos.
 
 
 
@@ -87,44 +110,110 @@ tibble(ganancias) |>
 
 
 
-Siendo `r round(promedio_ganancias, 2)` una estimación de la ganancia esperada durante un año de juego con la máquina B.
+Resultando `r round(promedio_ganancias, 2)` una estimación de la ganancia esperada durante un año de juego con la máquina B.
+
+
+
+
 
 \newpage
-
 
 ## Estrategias
 
 Sin embargo las personas no tienen información acerca de las probabilidades de éxito de las máquinas, por lo que se diseñaron un conjunto de estrategias para descubrir con cúal se obtienen mejores resultados. 
 
-```{r prior}
-thetas <- seq(0,1,length.out = 1000)
-
-prior <- dbeta(thetas,2,2)
-```
-
-```{r grafico prior, eval=FALSE}
-tibble(thetas, prior) |>
-
-  ggplot() +
-
-  geom_line(aes(x = thetas, y = prior),
-
-            color = "dodgerblue4",
-
-            linewidth = 1) +
-
-  labs(x = expression(theta), y = "Probabilidad") +
-
-  geom_hline(yintercept = 0, color = "black", size = 0.2) +
-
-  geom_vline(xintercept = 0, color = "black", size = 0.2)
-
-```
 
 ```{r cargamos las funciones}
 source("Estrategias_y_simulacion.R")
 ```
 
+::: {.callout-note}
+## Función simulación
+
+```{r funcion simulacion, echo=TRUE, eval=FALSE}
+
+# n simulaciones de los 366 dias, jugando 1 vez por día
+simulacion <- function(metodo, n = 1, param = 0.2) {
+  
+  if(!(metodo %in% names(estrategias))){
+    stop("El método introducido no está especificado")
+  }
+  if(n<1 || (n != round(n))){
+    stop("La cantidad de simulaciones debe ser un número natural")
+  }
+  if(metodo == "softmax" && param <= 0){
+    stop("Para el método softmax el parámetro de temperatura debe ser mayor que 0")
+  }
+  if(metodo == "e_greedy" && (param < 0 || param > 1)){
+    stop("Para el método e-greedy el parámetro epsilon debe estar entre 0 y 1")
+  }
+  
+  # Creamos los vectores donde guardaremos las ganancias y maquinas de los 366 dias para cada repeticion
+  # Creamos tambien una futura lista llamada sim que va a guardar las ganancias y las maquinas usadas en las repeticiones
+  ganancias <- NULL
+  maquinas <- NULL
+  sim <- NULL
+  
+  # Hacemos n repeticiones
+  for (rep in 1:n) {
+    
+    #Creamos los vectores que guardaran las ganancias y las maquinas usadas en cada dia
+    ganancia <- numeric(length = 366)
+    maquina <- NULL
+    for (dia in 1:366) {
+      
+      # Para cada dia la maquina sera elegida con alguno de las estrategias diseñadas
+      # maquina_dia <- estrategias[[metodo]](maquina, ganancia, param)
+      
+      # Intento de limpiar el codigo
+      argumentos <- switch (metodo,
+                            "al_azar" = list(),
+                            "gcto" = list(maquina, ganancia),
+                            "gcpp" = list(maquina, ganancia),
+                            "e_greedy" = list(maquina, ganancia, param),
+                            "softmax" = list(maquina, ganancia, param),
+                            "thompson" = list(maquina, ganancia),
+                            "upper_bound" = list(maquina, ganancia, param)
+                            )
+      
+      maquina_dia <- do.call(estrategias[[metodo]], argumentos)
+      
+      
+      # una vez elegida la maquina simulamos con una bernoulli con la probabilidad de la maquina
+      # y guardamos el resultado
+      ganancia[dia] <- rbinom(1, size = 1, prob = prob_reales[maquina_dia])
+      
+      # Guardamos ademas la maquina utilizada
+      maquina[dia] <- maquina_dia
+    }
+    
+    # Guardamos en matrices las ganancias y las maquinas de los 366 dias de las diferentes repeticiones
+    ganancias <- cbind(ganancias, ganancia)
+    maquinas <- cbind(maquinas, maquina)
+    
+  }  
+  
+  #Transformamos las matrices en tibbles, y les asignamos nombres a las columnas segun el repeticion
+  ganancias <- as_tibble(ganancias)
+  maquinas <- as_tibble(maquinas)
+  
+  colnames(ganancias) <- paste0("Rep_",1:1000)
+  colnames(maquinas) <- paste0("Rep_",1:1000)
+  
+  
+  # Añadimos los tibbles a la lista
+  sim[["Ganancias"]] <- ganancias
+  sim[["Maquinas"]] <- maquinas
+  
+  # Devolvemos la lista
+  sim 
+  
+}
+
+```
+
+
+:::
 
 \newpage
 ### Completamente al azar
@@ -183,7 +272,7 @@ Y así resultan las distribuciones de la probabilidad de éxito en cada máquina
 
 Ventajas de la estrategia:
 
-  - No se corre el riesgo de concentrarse en una máquina que produciría menos ganancias.
+  - No se corre el riesgo de concentrarse demasiado en una máquina que produciría menos ganancias.
   
 Desventajas de la estrategia:
 
@@ -297,7 +386,7 @@ Para elegir la máquina que se va a jugar en el día se hizo uso de la siguiente
 ::: {.callout-note}
 ## Función gcpp
 
-```{r funcion gcto, echo=TRUE, eval=FALSE}
+```{r funcion gcpp, echo=TRUE, eval=FALSE}
 
 # Greedy con probabilidad a posteriori
 
@@ -340,21 +429,21 @@ gcpp <- function(maquina, ganancia) {
 
 Simulando los 366 días de juego:
 
-```{r sim gcto}
-sim <- simulacion("gcto", n = 1)
+```{r sim gcpp}
+sim <- simulacion("gcpp", n = 1)
 
 salida <- salidas(sim)
 
 
 ```
 
-```{r gcto grafico_ganancias_acumuladas}
+```{r gcpp grafico_ganancias_acumuladas}
 salida$grafico_ganancias_acumuladas
 ```
 
 Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
 
-```{r gcto grafico_barplot}
+```{r gcpp grafico_barplot}
 salida$grafico_barplot
 
 maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n = sum(Cantidad)) |> filter(n == max(n)) |> select(Maquina) |> as.character() 
@@ -364,7 +453,7 @@ maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n =
 `r ifelse(length(maquina_mas_jugada) == 1, paste("La máquina más jugada fue la", maquina_mas_jugada) ,paste("Las máquinas más jugadas fueron las", paste(maquina_mas_jugada, collapse = " y ")))`
 
 
-```{r gcto grafico_posteriors}
+```{r gcpp grafico_posteriors}
 salida$grafico_posteriors
 ```
 
@@ -389,7 +478,7 @@ Para elegir la máquina que se va a jugar en el día se hizo uso de la siguiente
 ::: {.callout-note}
 ## Función e_greedy
 
-```{r funcion gcto, echo=TRUE, eval=FALSE}
+```{r funcion e_greedy, echo=TRUE, eval=FALSE}
 # e-Greedy con tasa observada
 
 e_greedy <- function(maquina, ganancia, param) {
@@ -442,21 +531,21 @@ e_greedy <- function(maquina, ganancia, param) {
 
 Simulando los 366 días de juego:
 
-```{r sim gcto}
-sim <- simulacion("gcto", n = 1)
+```{r sim e_greedy}
+sim <- simulacion("e_greedy", n = 1)
 
 salida <- salidas(sim)
 
 
 ```
 
-```{r gcto grafico_ganancias_acumuladas}
+```{r e_greedy grafico_ganancias_acumuladas}
 salida$grafico_ganancias_acumuladas
 ```
 
 Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
 
-```{r gcto grafico_barplot}
+```{r e_greedy grafico_barplot}
 salida$grafico_barplot
 
 maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n = sum(Cantidad)) |> filter(n == max(n)) |> select(Maquina) |> as.character() 
@@ -466,7 +555,7 @@ maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n =
 `r ifelse(length(maquina_mas_jugada) == 1, paste("La máquina más jugada fue la", maquina_mas_jugada) ,paste("Las máquinas más jugadas fueron las", paste(maquina_mas_jugada, collapse = " y ")))`
 
 
-```{r gcto grafico_posteriors}
+```{r e_greedy grafico_posteriors}
 salida$grafico_posteriors
 ```
 
@@ -491,7 +580,7 @@ Para elegir la máquina que se va a jugar en el día se hizo uso de la siguiente
 ::: {.callout-note}
 ## Función softmax
 
-```{r funcion gcto, echo=TRUE, eval=FALSE}
+```{r funcion softmax, echo=TRUE, eval=FALSE}
 
 # Softmax -------------
 
@@ -531,21 +620,21 @@ softmax <- function(maquina, ganancia, param) {
 
 Simulando los 366 días de juego:
 
-```{r sim gcto}
-sim <- simulacion("gcto", n = 1)
+```{r sim softmax}
+sim <- simulacion("softmax", n = 1)
 
 salida <- salidas(sim)
 
 
 ```
 
-```{r gcto grafico_ganancias_acumuladas}
+```{r softmax grafico_ganancias_acumuladas}
 salida$grafico_ganancias_acumuladas
 ```
 
 Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
 
-```{r gcto grafico_barplot}
+```{r softmax grafico_barplot}
 salida$grafico_barplot
 
 maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n = sum(Cantidad)) |> filter(n == max(n)) |> select(Maquina) |> as.character() 
@@ -555,7 +644,7 @@ maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n =
 `r ifelse(length(maquina_mas_jugada) == 1, paste("La máquina más jugada fue la", maquina_mas_jugada) ,paste("Las máquinas más jugadas fueron las", paste(maquina_mas_jugada, collapse = " y ")))`
 
 
-```{r gcto grafico_posteriors}
+```{r softmax grafico_posteriors}
 salida$grafico_posteriors
 ```
 
@@ -581,7 +670,7 @@ Para elegir la máquina que se va a jugar en el día se hizo uso de la siguiente
 ::: {.callout-note}
 ## Función UB
 
-```{r funcion gcto, echo=TRUE, eval=FALSE}
+```{r funcion upper-bound, echo=TRUE, eval=FALSE}
 
 # Upper-Bound -------------
 
@@ -628,21 +717,21 @@ UB <- function(maquina, ganancia, param) {
 
 Simulando los 366 días de juego:
 
-```{r sim gcto}
-sim <- simulacion("gcto", n = 1)
+```{r sim upper-bound}
+sim <- simulacion("upper_bound", n = 1)
 
 salida <- salidas(sim)
 
 
 ```
 
-```{r gcto grafico_ganancias_acumuladas}
+```{r upper-bound grafico_ganancias_acumuladas}
 salida$grafico_ganancias_acumuladas
 ```
 
 Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
 
-```{r gcto grafico_barplot}
+```{r upper-bound grafico_barplot}
 salida$grafico_barplot
 
 maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n = sum(Cantidad)) |> filter(n == max(n)) |> select(Maquina) |> as.character() 
@@ -652,7 +741,7 @@ maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n =
 `r ifelse(length(maquina_mas_jugada) == 1, paste("La máquina más jugada fue la", maquina_mas_jugada) ,paste("Las máquinas más jugadas fueron las", paste(maquina_mas_jugada, collapse = " y ")))`
 
 
-```{r gcto grafico_posteriors}
+```{r upper-bound grafico_posteriors}
 salida$grafico_posteriors
 ```
 
@@ -678,7 +767,7 @@ Para elegir la máquina que se va a jugar en el día se hizo uso de la siguiente
 ::: {.callout-note}
 ## Función thompson
 
-```{r funcion gcto, echo=TRUE, eval=FALSE}
+```{r funcion thompson, echo=TRUE, eval=FALSE}
 
 # Thompson -------------
 
@@ -720,21 +809,21 @@ thompson <- function(maquina, ganancia) {
 
 Simulando los 366 días de juego:
 
-```{r sim gcto}
-sim <- simulacion("gcto", n = 1)
+```{r sim thompson}
+sim <- simulacion("thompson", n = 1)
 
 salida <- salidas(sim)
 
 
 ```
 
-```{r gcto grafico_ganancias_acumuladas}
+```{r thompson grafico_ganancias_acumuladas}
 salida$grafico_ganancias_acumuladas
 ```
 
 Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
 
-```{r gcto grafico_barplot}
+```{r thompson grafico_barplot}
 salida$grafico_barplot
 
 maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n = sum(Cantidad)) |> filter(n == max(n)) |> select(Maquina) |> as.character() 
@@ -744,7 +833,7 @@ maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n =
 `r ifelse(length(maquina_mas_jugada) == 1, paste("La máquina más jugada fue la", maquina_mas_jugada) ,paste("Las máquinas más jugadas fueron las", paste(maquina_mas_jugada, collapse = " y ")))`
 
 
-```{r gcto grafico_posteriors}
+```{r thompson grafico_posteriors}
 salida$grafico_posteriors
 ```
 
