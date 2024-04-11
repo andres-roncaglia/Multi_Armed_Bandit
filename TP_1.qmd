@@ -850,16 +850,40 @@ Y así resultan las distribuciones de la probabilidad de éxito en cada máquina
 
 Ventajas de la estrategia:
 
-  - Utiliza la información de las tiradas anteriores
+  - Utiliza la información de las tiradas anteriores.
   
-  - 
+  - A medida que pasan los días, la estrategia eligirá con mayor frecuencia a la mejor máquina.
 
 Desventajas de la estrategia:
 
-  -
+  - Si las distribuciones a priori del parámetro no se definen adecuadamente, la estrategia puede llevar a conclusiones erróneas en períodos de tiempo que no sean suficientemente largos.
+
+## Comparaciones
+
+```{r e_greedy maximizacion de epsilon}
+secuencia <- seq(0, 1, length.out = 50)
+ganancias_esperadas <- NULL
+posicion <- 0
+
+for(i in secuencia) {
+  posicion <- posicion + 1
+  temp <- simulacion("e_greedy", n = 1000, param = i)
+  ganancias_esperadas[posicion] <- round(sum(as.matrix(temp$Ganancias))/1000, 2)
+  cat(i*100, "\n")
+}
+
+names(ganancias_esperadas) <- secuencia
+
+ggplot() +
+  aes(x = secuencia, y = ganancias_esperadas) +
+  geom_line() +
+  geom_vline(xintercept = secuencia[which.max(ganancias_esperadas)])
+
+ganancias_esperadas
+```
 
 
-# Conclución
+# Conclusión
 
 # Cosas a agregar
 
