@@ -21,7 +21,7 @@ library(RColorBrewer)
 ```
 
 ```{r Configuraciones predeterminadas}
-knitr::opts_chunk$set(fig.align = "center", fig.width = "60%", out.width = "70%")
+knitr::opts_chunk$set(fig.align = "center", out.width = "70%")
 
 set.seed("18122022")
 
@@ -72,6 +72,9 @@ tibble(thetas, prior) |>
 
 ```
 
+
+
+\newpage
 # Resultados
 
 Para obtener una noción de cuanto se ganaría en promedio en un año de juego con la mejor máquina (máquina B), se simulan 1000 secuencias de 366 juegos.
@@ -114,10 +117,6 @@ Resultando `r round(promedio_ganancias, 2)` una estimación de la ganancia esper
 
 
 
-
-
-\newpage
-
 ## Estrategias
 
 Sin embargo las personas no tienen información acerca de las probabilidades de éxito de las máquinas, por lo que se diseñaron un conjunto de estrategias para descubrir con cúal se obtienen mejores resultados. 
@@ -131,7 +130,6 @@ source("Estrategias_y_simulacion.R")
 ## Función simulación
 
 ```{r funcion simulacion, echo=TRUE, eval=FALSE}
-
 # n simulaciones de los 366 dias, jugando 1 vez por día
 simulacion <- function(metodo, n = 1, param = 0.2) {
   
@@ -148,24 +146,31 @@ simulacion <- function(metodo, n = 1, param = 0.2) {
     stop("Para el método e-greedy el parámetro epsilon debe estar entre 0 y 1")
   }
   
-  # Creamos los vectores donde guardaremos las ganancias y maquinas de los 366 dias para cada repeticion
-  # Creamos tambien una futura lista llamada sim que va a guardar las ganancias y las maquinas usadas en las repeticiones
+```
+:::
+
+::: {.callout-note}
+##  ‎ ‎ ‎
+```{r funcion simulacion 2, echo=TRUE, eval=FALSE}
+# Creamos los vectores donde guardaremos las ganancias y maquinas de los 366 
+  # dias para cada repeticion. Creamos tambien una futura lista llamada sim que
+  # va a guardar las ganancias y las maquinas usadas en las repeticiones
+  
   ganancias <- NULL
   maquinas <- NULL
   sim <- NULL
-  
+
   # Hacemos n repeticiones
   for (rep in 1:n) {
     
-    #Creamos los vectores que guardaran las ganancias y las maquinas usadas en cada dia
+    #Creamos los vectores que guardaran las ganancias y las maquinas usadas en 
+    # cada dia
     ganancia <- numeric(length = 366)
     maquina <- NULL
     for (dia in 1:366) {
       
-      # Para cada dia la maquina sera elegida con alguno de las estrategias diseñadas
-      # maquina_dia <- estrategias[[metodo]](maquina, ganancia, param)
-      
-      # Intento de limpiar el codigo
+      # Para cada dia la maquina sera elegida con alguno de las estrategias 
+      # diseñadas
       argumentos <- switch (metodo,
                             "al_azar" = list(),
                             "gcto" = list(maquina, ganancia),
@@ -178,28 +183,33 @@ simulacion <- function(metodo, n = 1, param = 0.2) {
       
       maquina_dia <- do.call(estrategias[[metodo]], argumentos)
       
-      
-      # una vez elegida la maquina simulamos con una bernoulli con la probabilidad de la maquina
-      # y guardamos el resultado
+            # una vez elegida la maquina simulamos con una bernoulli con la 
+      # probabilidad de la maquina y guardamos el resultado
       ganancia[dia] <- rbinom(1, size = 1, prob = prob_reales[maquina_dia])
       
       # Guardamos ademas la maquina utilizada
       maquina[dia] <- maquina_dia
     }
-    
-    # Guardamos en matrices las ganancias y las maquinas de los 366 dias de las diferentes repeticiones
+```
+:::
+
+::: {.callout-note}
+##  ‎ ‎ ‎
+```{r funcion simulacion 3, echo=TRUE, eval=FALSE}
+    # Guardamos en matrices las ganancias y las maquinas de los 366 dias
+    # de las diferentes repeticiones
     ganancias <- cbind(ganancias, ganancia)
     maquinas <- cbind(maquinas, maquina)
     
   }  
   
-  #Transformamos las matrices en tibbles, y les asignamos nombres a las columnas segun el repeticion
+  #Transformamos las matrices en tibbles, y les asignamos nombres a las columnas
+  # segun el repeticion
   ganancias <- as_tibble(ganancias)
   maquinas <- as_tibble(maquinas)
   
   colnames(ganancias) <- paste0("Rep_",1:1000)
   colnames(maquinas) <- paste0("Rep_",1:1000)
-  
   
   # Añadimos los tibbles a la lista
   sim[["Ganancias"]] <- ganancias
@@ -207,7 +217,6 @@ simulacion <- function(metodo, n = 1, param = 0.2) {
   
   # Devolvemos la lista
   sim 
-  
 }
 
 ```
@@ -215,7 +224,8 @@ simulacion <- function(metodo, n = 1, param = 0.2) {
 
 :::
 
-\newpage
+\
+
 ### Completamente al azar
 
 Consiste en elegir cada día una máquina cualquiera sin importar los resultados que se hayan obtenido en el día anterior. Esta estrategia se concentra únicamente en "explorar" pero nunca considera "explotar" como una posibilidad.
@@ -237,7 +247,7 @@ al_azar <- function() {
 
 
 :::
-
+\newpage
 Simulando los 366 días de juego:
 
 ```{r sim al azar}
@@ -249,6 +259,9 @@ salida <- salidas(sim)
 ```
 
 ```{r al azar grafico_ganancias_acumuladas}
+#| label: fig-iris
+#| tbl-cap: "Ganancias"
+
 salida$grafico_ganancias_acumuladas
 ```
 
@@ -332,7 +345,7 @@ gcto <- function(maquina, ganancia) {
 ```
 :::
 
-
+\newpage
 Simulando los 366 días de juego:
 
 ```{r sim gcto}
@@ -358,7 +371,7 @@ maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n =
 
 `r ifelse(length(maquina_mas_jugada) == 1, paste("La máquina más jugada fue la", maquina_mas_jugada) ,paste("Las máquinas más jugadas fueron las", paste(maquina_mas_jugada, collapse = " y ")))`
 
-
+\newpage
 ```{r gcto grafico_posteriors}
 salida$grafico_posteriors
 ```
@@ -379,7 +392,7 @@ Desventajas de la estrategia:
 \newpage
 ### Greedy con probabilidad a posteriori
 
-La máquina con la que se juega será la que tenga la mayor tasa de éxito hasta el dia en que se juega. Esta estrategia se concentra demasiado en "explotar" y casi nada en "explorar".
+Partiendo de las creencias iniciales, luego de cada tirada y considerando las realizadas hasta el momento, se redefinen las probabilidades de éxito esperadas de cada máquina y se selecciona la mejor. 
 
 Para elegir la máquina que se va a jugar en el día se hizo uso de la siguiente función:
 
@@ -420,13 +433,10 @@ gcpp <- function(maquina, ganancia) {
   return(maq)
   
 }
-
-
-
 ```
 :::
 
-
+\newpage
 Simulando los 366 días de juego:
 
 ```{r sim gcpp}
@@ -452,7 +462,7 @@ maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n =
 
 `r ifelse(length(maquina_mas_jugada) == 1, paste("La máquina más jugada fue la", maquina_mas_jugada) ,paste("Las máquinas más jugadas fueron las", paste(maquina_mas_jugada, collapse = " y ")))`
 
-
+\newpage
 ```{r gcpp grafico_posteriors}
 salida$grafico_posteriors
 ```
@@ -461,17 +471,21 @@ Y así resultan las distribuciones de la probabilidad de éxito en cada máquina
 
 Ventajas de la estrategia:
 
-  -
+  - Se tiene en cuenta toda la informacíon obtenida hasta el momento.
+  
+  - No se concentra demasiado pronto en explotar.
 
 Desventajas de la estrategia:
 
-  -
+  - Explora únicamente en los primeros días.
+  
+  - Aunque de manera menos frecuente que en el caso anterior, suele explotar la máquina incorrecta.
 
 
 \newpage
-### e-Greedy con tasa observada
+### $\epsilon$-Greedy con tasa observada
 
-La máquina con la que se juega será la que tenga la mayor tasa de éxito hasta el dia en que se juega. Esta estrategia se concentra demasiado en "explotar" y casi nada en "explorar".
+Se selecciona con una probabilidad $1-\epsilon$ la máquina que hasta el momento tenga la mayor tasa de éxito observada, y con una probabilidad de $\frac{\epsilon}{2}$ las máquinas restantes. $\epsilon$ es un parámetro de exploración, cuando es igual a $0$ la estrategia es igual a "Greedy con tasa observada", cuando es igual a $1$ es igual a la estrategia "Al azar".
 
 Para elegir la máquina que se va a jugar en el día se hizo uso de la siguiente función:
 
@@ -482,14 +496,10 @@ Para elegir la máquina que se va a jugar en el día se hizo uso de la siguiente
 # e-Greedy con tasa observada
 
 e_greedy <- function(maquina, ganancia, param) {
-  
   # Las tazas son 0 en la primera iteracion
   tasa <- numeric(3)
   
-  
   # Cuando una maquina no se usa ni una vez, la tasa va a seguir siendo 0
-  # Cuando se juegue al menos una vez su tasa será el numero de veces que gano en la maquina
-  # dividido la cantidad de veces que jugo con la maquina
   if (sum(maquina == "A") > 0) {
     tasa[1] <- sum(ganancia[maquina == "A"])/sum(maquina == "A")
   }
@@ -502,40 +512,34 @@ e_greedy <- function(maquina, ganancia, param) {
   
   # Se asigna el nombre de la maquina para cada tasa
   names(tasa) <- c("A","B","C")
-  # Verifica cual es la tasa mas alta y la elige, si hay una sola elige la maquina a la cual le
-  # pertenezca esa tasa, si hay varias maquinas con la misma tasa elige una al azar entre las 
-  # que tengan la mayor tasa
-  if (sum(tasa == max(tasa)) == 1) {
-    prob <- rep(param/2,3)
-    prob[which.max(tasa)] <- 1-param
-    maq <- sample(names(tasa),size = 1,prob = prob)
-    
-  } else if (sum(tasa == max(tasa)) == 2) {
-    prob <- rep((1-param)/2,3)
-    prob[which.min(tasa)] <- param
-    maq <- sample(names(tasa),size = 1,prob = prob)
+  
+  aleatorio <- runif(1)
+  
+  if (aleatorio <= 1-param) {
+    # Verifica cual es la tasa mas alta y la elige
+    if (sum(tasa == max(tasa)) == 1) {
+      maq <- names(tasa)[tasa == max(tasa)]
+    } else if (sum(tasa == max(tasa)) == 2) {
+      maq <- sample(size = 1, names(tasa)[tasa == max(tasa)])
+    } else {
+      maq <- sample(names(tasa),size = 1)
+    }
     
   } else {
     maq <- sample(names(tasa),size = 1)
-    
   }
-  
   return(maq)
 }
-
-
-
 ```
 :::
 
-
+\newpage
 Simulando los 366 días de juego:
 
 ```{r sim e_greedy}
 sim <- simulacion("e_greedy", n = 1)
 
 salida <- salidas(sim)
-
 
 ```
 
@@ -563,17 +567,23 @@ Y así resultan las distribuciones de la probabilidad de éxito en cada máquina
 
 Ventajas de la estrategia:
 
-  -
+  - La asignación del parámetro $\epsilon$ permite regular hasta que punto se prefiere explorar por sobre explotar o viceversa.
+  
+  - Con buenos valores de $\epsilon$ se obtiene un buen balance entre explotación y exploración, llevando en muchos casos a buenas ganancias.
+  
+  - La estrategia nunca comete el error de explotar una sola máquina, ya que siempre existe una probabilidad $\epsilon > 0$ de elegir una máquina al azar.
 
 Desventajas de la estrategia:
 
-  -
+  - Valores demasiado altos de $\epsilon$ producen un exceso de exploración y no se aprovecha la información obtenida.
+  
+  - Valores demasiado pequeños de $\epsilon$ pueden producir que se sobreexplote una mala máquina.
 
 
 \newpage
 ### Softmax
 
-La máquina con la que se juega será la que tenga la mayor tasa de éxito hasta el dia en que se juega. Esta estrategia se concentra demasiado en "explotar" y casi nada en "explorar".
+
 
 Para elegir la máquina que se va a jugar en el día se hizo uso de la siguiente función:
 

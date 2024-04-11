@@ -80,17 +80,13 @@ gcpp <- function(maquina, ganancia) {
 
 
 
-# e-Greedy con tasa observada -------------
+# e-Greedy con tasa observada ----------------
 
 e_greedy <- function(maquina, ganancia, param) {
-  
   # Las tazas son 0 en la primera iteracion
   tasa <- numeric(3)
   
-  
   # Cuando una maquina no se usa ni una vez, la tasa va a seguir siendo 0
-  # Cuando se juegue al menos una vez su tasa será el numero de veces que gano en la maquina
-  # dividido la cantidad de veces que jugo con la maquina
   if (sum(maquina == "A") > 0) {
     tasa[1] <- sum(ganancia[maquina == "A"])/sum(maquina == "A")
   }
@@ -103,22 +99,23 @@ e_greedy <- function(maquina, ganancia, param) {
   
   # Se asigna el nombre de la maquina para cada tasa
   names(tasa) <- c("A","B","C")
-  # Verifica cual es la tasa mas alta y la elige, si hay una sola elige la maquina a la cual le
-  # pertenezca esa tasa, si hay varias maquinas con la misma tasa elige una al azar entre las 
-  # que tengan la mayor tasa
-  if (sum(tasa == max(tasa)) == 1) {
-    prob <- rep(param/2,3)
-    prob[which.max(tasa)] <- 1-param
-    maq <- sample(names(tasa),size = 1,prob = prob)
-    
-  } else if (sum(tasa == max(tasa)) == 2) {
-    prob <- rep((1-param)/2,3)
-    prob[which.min(tasa)] <- param
-    maq <- sample(names(tasa),size = 1,prob = prob)
+  
+  aleatorio <- runif(1)
+  
+  if (aleatorio <= 1-param) {
+    # Verifica cual es la tasa mas alta y la elige
+    if (sum(tasa == max(tasa)) == 1) {
+      maq <- names(tasa)[tasa == max(tasa)]
+      
+    } else if (sum(tasa == max(tasa)) == 2) {
+      maq <- sample(size = 1, names(tasa)[tasa == max(tasa)])
+      
+    } else {
+      maq <- sample(names(tasa),size = 1)
+    }
     
   } else {
     maq <- sample(names(tasa),size = 1)
-    
   }
   
   return(maq)
