@@ -51,7 +51,7 @@ Se asume además que la creencia inicial de la probabilidad de ganar para cada m
 
 # Resultados
 
-Para obtener una noción de cuanto se ganaría en promedio en un año de juego con la mejor máquina (máquina B).
+Para obtener una noción de cuanto se ganaría en promedio en un año de juego con la mejor máquina (máquina B), se simula 1000 veces las ganancias obtenidas en un año.
 
 
 
@@ -94,7 +94,7 @@ Siendo `r round(promedio_ganancias, 2)` una estimación de la ganancia esperada 
 
 ## Estrategias
 
-Sin embargo las personas no tienen información acerca de las probabilidades de éxito de las máquinas, por lo que se diseñaron un conjunto de estrategias para descubrir con cual se obtienen mejores resultados. 
+Sin embargo las personas no tienen información acerca de las probabilidades de éxito de las máquinas, por lo que se diseñaron un conjunto de estrategias para descubrir con cúal se obtienen mejores resultados. 
 
 ```{r prior}
 thetas <- seq(0,1,length.out = 1000)
@@ -126,7 +126,7 @@ source("Estrategias_y_simulacion.R")
 ```
 
 
-
+\newpage
 ### Completamente al azar
 
 Consiste en elegir cada día una máquina cualquiera sin importar los resultados que se hayan obtenido en el día anterior. Esta estrategia se concentra únicamente en "explorar" pero nunca considera "explotar" como una posibilidad.
@@ -189,7 +189,7 @@ Desventajas de la estrategia:
 
   - No tiene en cuenta la información que se adquiere a través de los días.
 
-
+\newpage
 ### Greedy con tasa observada
 
 La máquina con la que se juega será la que tenga la mayor tasa de éxito hasta el dia en que se juega. Esta estrategia se concentra demasiado en "explotar" y casi nada en "explorar".
@@ -287,8 +287,479 @@ Desventajas de la estrategia:
   - Es posible elegir explotar la peor máquina.
 
 
+\newpage
+### Greedy con probabilidad a posteriori
+
+La máquina con la que se juega será la que tenga la mayor tasa de éxito hasta el dia en que se juega. Esta estrategia se concentra demasiado en "explotar" y casi nada en "explorar".
+
+Para elegir la máquina que se va a jugar en el día se hizo uso de la siguiente función:
+
+::: {.callout-note}
+## Función gcpp
+
+```{r funcion gcto, echo=TRUE, eval=FALSE}
+
+# Greedy con probabilidad a posteriori
+
+gcpp <- function(maquina, ganancia) {
+  
+  # Argumentos de las distribuciones de los parámetros
+  a1 <- 2; b1 <- 2; c1 <- 2; a2 <- 2; b2 <- 2; c2 <- 2
+  
+  if (sum(maquina == "A") > 0) {
+    a1 <- 2 + sum(ganancia[maquina == "A"])
+    a2 <- 2 + abs(sum(ganancia[maquina == "A"] -1))
+  }
+  if (sum(maquina == "B") > 0) {
+    b1 <- 2 + sum(ganancia[maquina == "B"])
+    b2 <- 2 + abs(sum(ganancia[maquina == "B"] -1))
+  }
+  if (sum(maquina == "C") > 0) {
+    c1 <- 2 + sum(ganancia[maquina == "C"])
+    c2 <- 2 + abs(sum(ganancia[maquina == "C"] -1))
+  }
+  
+  prob <- c(a1/(a1+a2), b1/(b1+b2), c1/(c1+c2))
+  names(prob) <- c("A","B","C")
+  
+  if (sum(prob == max(prob)) == 1) {
+    maq <- names(prob[which.max(prob)])
+  } else {
+    maq <- sample(names(prob[prob == max(prob)]), size = 1)
+  }
+  
+  return(maq)
+  
+}
 
 
+
+```
+:::
+
+
+Simulando los 366 días de juego:
+
+```{r sim gcto}
+sim <- simulacion("gcto", n = 1)
+
+salida <- salidas(sim)
+
+
+```
+
+```{r gcto grafico_ganancias_acumuladas}
+salida$grafico_ganancias_acumuladas
+```
+
+Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
+
+```{r gcto grafico_barplot}
+salida$grafico_barplot
+
+maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n = sum(Cantidad)) |> filter(n == max(n)) |> select(Maquina) |> as.character() 
+
+```
+
+`r ifelse(length(maquina_mas_jugada) == 1, paste("La máquina más jugada fue la", maquina_mas_jugada) ,paste("Las máquinas más jugadas fueron las", paste(maquina_mas_jugada, collapse = " y ")))`
+
+
+```{r gcto grafico_posteriors}
+salida$grafico_posteriors
+```
+
+Y así resultan las distribuciones de la probabilidad de éxito en cada máquina a posteriori. 
+
+Ventajas de la estrategia:
+
+  -
+
+Desventajas de la estrategia:
+
+  -
+
+
+\newpage
+### e-Greedy con tasa observada
+
+La máquina con la que se juega será la que tenga la mayor tasa de éxito hasta el dia en que se juega. Esta estrategia se concentra demasiado en "explotar" y casi nada en "explorar".
+
+Para elegir la máquina que se va a jugar en el día se hizo uso de la siguiente función:
+
+::: {.callout-note}
+## Función e_greedy
+
+```{r funcion gcto, echo=TRUE, eval=FALSE}
+# e-Greedy con tasa observada
+
+e_greedy <- function(maquina, ganancia, param) {
+  
+  # Las tazas son 0 en la primera iteracion
+  tasa <- numeric(3)
+  
+  
+  # Cuando una maquina no se usa ni una vez, la tasa va a seguir siendo 0
+  # Cuando se juegue al menos una vez su tasa será el numero de veces que gano en la maquina
+  # dividido la cantidad de veces que jugo con la maquina
+  if (sum(maquina == "A") > 0) {
+    tasa[1] <- sum(ganancia[maquina == "A"])/sum(maquina == "A")
+  }
+  if (sum(maquina == "B") > 0) {
+    tasa[2] <- sum(ganancia[maquina == "B"])/sum(maquina == "B")
+  }
+  if (sum(maquina == "C") > 0) {
+    tasa[3] <- sum(ganancia[maquina == "C"])/sum(maquina == "C")
+  }
+  
+  # Se asigna el nombre de la maquina para cada tasa
+  names(tasa) <- c("A","B","C")
+  # Verifica cual es la tasa mas alta y la elige, si hay una sola elige la maquina a la cual le
+  # pertenezca esa tasa, si hay varias maquinas con la misma tasa elige una al azar entre las 
+  # que tengan la mayor tasa
+  if (sum(tasa == max(tasa)) == 1) {
+    prob <- rep(param/2,3)
+    prob[which.max(tasa)] <- 1-param
+    maq <- sample(names(tasa),size = 1,prob = prob)
+    
+  } else if (sum(tasa == max(tasa)) == 2) {
+    prob <- rep((1-param)/2,3)
+    prob[which.min(tasa)] <- param
+    maq <- sample(names(tasa),size = 1,prob = prob)
+    
+  } else {
+    maq <- sample(names(tasa),size = 1)
+    
+  }
+  
+  return(maq)
+}
+
+
+
+```
+:::
+
+
+Simulando los 366 días de juego:
+
+```{r sim gcto}
+sim <- simulacion("gcto", n = 1)
+
+salida <- salidas(sim)
+
+
+```
+
+```{r gcto grafico_ganancias_acumuladas}
+salida$grafico_ganancias_acumuladas
+```
+
+Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
+
+```{r gcto grafico_barplot}
+salida$grafico_barplot
+
+maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n = sum(Cantidad)) |> filter(n == max(n)) |> select(Maquina) |> as.character() 
+
+```
+
+`r ifelse(length(maquina_mas_jugada) == 1, paste("La máquina más jugada fue la", maquina_mas_jugada) ,paste("Las máquinas más jugadas fueron las", paste(maquina_mas_jugada, collapse = " y ")))`
+
+
+```{r gcto grafico_posteriors}
+salida$grafico_posteriors
+```
+
+Y así resultan las distribuciones de la probabilidad de éxito en cada máquina a posteriori. 
+
+Ventajas de la estrategia:
+
+  -
+
+Desventajas de la estrategia:
+
+  -
+
+
+\newpage
+### Softmax
+
+La máquina con la que se juega será la que tenga la mayor tasa de éxito hasta el dia en que se juega. Esta estrategia se concentra demasiado en "explotar" y casi nada en "explorar".
+
+Para elegir la máquina que se va a jugar en el día se hizo uso de la siguiente función:
+
+::: {.callout-note}
+## Función softmax
+
+```{r funcion gcto, echo=TRUE, eval=FALSE}
+
+# Softmax -------------
+
+softmax <- function(maquina, ganancia, param) {
+  
+  # Las tasas son 0 en la primera iteracion
+  tasa <- numeric(3)
+  
+  # Cuando una maquina no se usa ni una vez, la tasa va a seguir siendo 0
+  # Cuando se juegue al menos una vez su tasa será el numero de veces que gano en la maquina
+  # dividido la cantidad de veces que jugo con la maquina
+  if (sum(maquina == "A") > 0) {
+    tasa[1] <- sum(ganancia[maquina == "A"])/sum(maquina == "A")
+  }
+  if (sum(maquina == "B") > 0) {
+    tasa[2] <- sum(ganancia[maquina == "B"])/sum(maquina == "B")
+  }
+  if (sum(maquina == "C") > 0) {
+    tasa[3] <- sum(ganancia[maquina == "C"])/sum(maquina == "C")
+  }
+  
+  # Se asigna el nombre de la maquina para cada tasa
+  names(tasa) <- c("A","B","C")
+  
+  # Calculo las probabilidades en base a las tasas
+  # Como tasa es un vector puedo operar como muestro abajo
+  probs <- exp(tasa/param)/sum(exp(tasa/param))
+  
+  # Directamente pongo el Sample en el return para eficiencia
+  
+  return(sample(names(tasa),size = 1,prob = probs))
+}
+
+```
+:::
+
+
+Simulando los 366 días de juego:
+
+```{r sim gcto}
+sim <- simulacion("gcto", n = 1)
+
+salida <- salidas(sim)
+
+
+```
+
+```{r gcto grafico_ganancias_acumuladas}
+salida$grafico_ganancias_acumuladas
+```
+
+Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
+
+```{r gcto grafico_barplot}
+salida$grafico_barplot
+
+maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n = sum(Cantidad)) |> filter(n == max(n)) |> select(Maquina) |> as.character() 
+
+```
+
+`r ifelse(length(maquina_mas_jugada) == 1, paste("La máquina más jugada fue la", maquina_mas_jugada) ,paste("Las máquinas más jugadas fueron las", paste(maquina_mas_jugada, collapse = " y ")))`
+
+
+```{r gcto grafico_posteriors}
+salida$grafico_posteriors
+```
+
+Y así resultan las distribuciones de la probabilidad de éxito en cada máquina a posteriori. 
+
+Ventajas de la estrategia:
+
+  -
+
+Desventajas de la estrategia:
+
+  -
+
+
+
+\newpage
+### Upper-Bound
+
+La máquina con la que se juega será la que tenga la mayor tasa de éxito hasta el dia en que se juega. Esta estrategia se concentra demasiado en "explotar" y casi nada en "explorar".
+
+Para elegir la máquina que se va a jugar en el día se hizo uso de la siguiente función:
+
+::: {.callout-note}
+## Función UB
+
+```{r funcion gcto, echo=TRUE, eval=FALSE}
+
+# Upper-Bound -------------
+
+UB <- function(maquina, ganancia, param) {
+  
+  # Argumentos de las distribuciones de los parámetros
+  a1 <- 2; b1 <- 2; c1 <- 2; a2 <- 2; b2 <- 2; c2 <- 2
+  
+  if (sum(maquina == "A") > 0) {
+    a1 <- 2 + sum(ganancia[maquina == "A"])
+    a2 <- 2 + abs(sum(ganancia[maquina == "A"] -1))
+  }
+  if (sum(maquina == "B") > 0) {
+    b1 <- 2 + sum(ganancia[maquina == "B"])
+    b2 <- 2 + abs(sum(ganancia[maquina == "B"] -1))
+  }
+  if (sum(maquina == "C") > 0) {
+    c1 <- 2 + sum(ganancia[maquina == "C"])
+    c2 <- 2 + abs(sum(ganancia[maquina == "C"] -1))
+  }
+  
+  # Limite superior de 95% credibilidad (Preguntar el miercoles 10/04)
+  ls <- c(qbeta(1 - param/2, a1, a2), qbeta(1 - param/2, b1, b2), qbeta(1 - param/2, c1, c2))
+  names(ls) <- c("A","B","C")
+  
+  # Para elegir el limite superior mayor
+  if (sum(ls == max(ls)) == 1) {
+    maq <- names(which.max(ls))
+    
+  } else if (sum(ls == max(ls)) == 2) {
+    maq <- sample(names(ls)[ls == max(ls)], size = 1)
+    
+  } else {
+    maq <- sample(names(ls), size = 1)
+    
+  }
+  
+  return(maq)
+}
+
+```
+:::
+
+
+Simulando los 366 días de juego:
+
+```{r sim gcto}
+sim <- simulacion("gcto", n = 1)
+
+salida <- salidas(sim)
+
+
+```
+
+```{r gcto grafico_ganancias_acumuladas}
+salida$grafico_ganancias_acumuladas
+```
+
+Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
+
+```{r gcto grafico_barplot}
+salida$grafico_barplot
+
+maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n = sum(Cantidad)) |> filter(n == max(n)) |> select(Maquina) |> as.character() 
+
+```
+
+`r ifelse(length(maquina_mas_jugada) == 1, paste("La máquina más jugada fue la", maquina_mas_jugada) ,paste("Las máquinas más jugadas fueron las", paste(maquina_mas_jugada, collapse = " y ")))`
+
+
+```{r gcto grafico_posteriors}
+salida$grafico_posteriors
+```
+
+Y así resultan las distribuciones de la probabilidad de éxito en cada máquina a posteriori. 
+
+Ventajas de la estrategia:
+
+  -
+
+Desventajas de la estrategia:
+
+  -
+  
+
+
+\newpage
+### Thompson
+
+La máquina con la que se juega será la que tenga la mayor tasa de éxito hasta el dia en que se juega. Esta estrategia se concentra demasiado en "explotar" y casi nada en "explorar".
+
+Para elegir la máquina que se va a jugar en el día se hizo uso de la siguiente función:
+
+::: {.callout-note}
+## Función thompson
+
+```{r funcion gcto, echo=TRUE, eval=FALSE}
+
+# Thompson -------------
+
+thompson <- function(maquina, ganancia) {
+  
+  # Argumentos de las distribuciones de los parámetros
+  a1 <- 2; b1 <- 2; c1 <- 2; a2 <- 2; b2 <- 2; c2 <- 2
+  
+  if (sum(maquina == "A") > 0) {
+    a1 <- 2 + sum(ganancia[maquina == "A"])
+    a2 <- 2 + abs(sum(ganancia[maquina == "A"] -1))
+  }
+  if (sum(maquina == "B") > 0) {
+    b1 <- 2 + sum(ganancia[maquina == "B"])
+    b2 <- 2 + abs(sum(ganancia[maquina == "B"] -1))
+  }
+  if (sum(maquina == "C") > 0) {
+    c1 <- 2 + sum(ganancia[maquina == "C"])
+    c2 <- 2 + abs(sum(ganancia[maquina == "C"] -1))
+  }
+  
+  
+  # Tomo una muestra de cada theta
+  muestras <- c(rbeta(1, a1, a2),rbeta(1, b1, b2), rbeta(1, c1, c2))
+  # Se podria agregar un parámetro para modificar el tamaño de las muestras y asi ponderar mas a los que tienen
+  # parametros mayores.
+  
+  names(muestras) <- c("A","B","C")
+  # Devuelvo la más grande
+  
+  return(names(muestras[which.max(muestras)]))
+  
+}
+
+
+```
+:::
+
+
+Simulando los 366 días de juego:
+
+```{r sim gcto}
+sim <- simulacion("gcto", n = 1)
+
+salida <- salidas(sim)
+
+
+```
+
+```{r gcto grafico_ganancias_acumuladas}
+salida$grafico_ganancias_acumuladas
+```
+
+Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
+
+```{r gcto grafico_barplot}
+salida$grafico_barplot
+
+maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n = sum(Cantidad)) |> filter(n == max(n)) |> select(Maquina) |> as.character() 
+
+```
+
+`r ifelse(length(maquina_mas_jugada) == 1, paste("La máquina más jugada fue la", maquina_mas_jugada) ,paste("Las máquinas más jugadas fueron las", paste(maquina_mas_jugada, collapse = " y ")))`
+
+
+```{r gcto grafico_posteriors}
+salida$grafico_posteriors
+```
+
+Y así resultan las distribuciones de la probabilidad de éxito en cada máquina a posteriori. 
+
+Ventajas de la estrategia:
+
+  -
+
+Desventajas de la estrategia:
+
+  -
+
+
+# Conclución
 
 # Cosas a agregar
 
@@ -296,3 +767,4 @@ Nombres a las figuras y titulos a los graficos
 
 Agregar al pdf la funcion simulacion
 
+Box-plots/Histogramas con las ganancias anuales de cada maquina para las 1000 repeticiones para compararlas

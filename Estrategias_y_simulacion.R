@@ -1,15 +1,15 @@
-# Probabilidades reales de ganar en las maquinas
+# Probabilidades reales de ganar en las maquinas -------------
 prob_reales <- c(0.3, 0.55, 0.45)
 names(prob_reales) <- c("A", "B", "C")
 
-# Estrategia al azar
+# Estrategia al azar -------------
 al_azar <- function() {
   # Elige una maquina al azar
   sample(names(prob_reales), 1)
 }
 
-
-# Greedy con tasa observada
+ 
+# Greedy con tasa observada -------------
 gcto <- function(maquina, ganancia) {
   
   # Las tazas son 0 en la primera iteracion
@@ -45,7 +45,7 @@ gcto <- function(maquina, ganancia) {
 }
 
 
-# Greedy con probabilidad a posteriori
+# Greedy con probabilidad a posteriori -------------
 
 gcpp <- function(maquina, ganancia) {
   
@@ -80,7 +80,7 @@ gcpp <- function(maquina, ganancia) {
 
 
 
-# e-Greedy con tasa observada
+# e-Greedy con tasa observada -------------
 
 e_greedy <- function(maquina, ganancia, param) {
   
@@ -124,6 +124,7 @@ e_greedy <- function(maquina, ganancia, param) {
   return(maq)
 }
 
+# Softmax -------------
 
 softmax <- function(maquina, ganancia, param) {
   
@@ -159,6 +160,8 @@ softmax <- function(maquina, ganancia, param) {
   # Si el valor de temperatura es grande, le da menos peso a la tasa ganadora de la maquina.
 
   # Preguntar por el "intervalo de credibilidad Bayesiano"!!!!
+
+# Upper-Bound -------------
 
 UB <- function(maquina, ganancia, param) {
   
@@ -196,6 +199,8 @@ UB <- function(maquina, ganancia, param) {
   
   return(maq)
 }
+
+# Thompson -------------
 
 thompson <- function(maquina, ganancia) {
   
