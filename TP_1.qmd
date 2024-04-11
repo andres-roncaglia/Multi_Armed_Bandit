@@ -512,23 +512,16 @@ e_greedy <- function(maquina, ganancia, param) {
   
   # Se asigna el nombre de la maquina para cada tasa
   names(tasa) <- c("A","B","C")
-  
+  # Se selecciona entre explorar o explotar
   aleatorio <- runif(1)
   
-  if (aleatorio <= 1-param) {
-    # Verifica cual es la tasa mas alta y la elige
-    if (sum(tasa == max(tasa)) == 1) {
-      maq <- names(tasa)[tasa == max(tasa)]
-    } else if (sum(tasa == max(tasa)) == 2) {
-      maq <- sample(size = 1, names(tasa)[tasa == max(tasa)])
-    } else {
-      maq <- sample(names(tasa),size = 1)
+  probs <- c(0,0,0)
+  if (aleatorio <= param) {return(sample(names(tasa),size = 1))}else{
+    for (i in 1:3) {
+      if((tasa == max(tasa))[i]){probs[i] <- 1/sum(tasa == max(tasa))}
     }
-    
-  } else {
-    maq <- sample(names(tasa),size = 1)
+    return(sample(names(tasa),size = 1,prob = probs))
   }
-  return(maq)
 }
 ```
 :::
