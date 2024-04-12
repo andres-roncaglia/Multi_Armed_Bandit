@@ -255,9 +255,12 @@ simulacion <- function(metodo, n = 1, param = 0.2) {
   maquinas <- NULL
   sim <- NULL
   
+  #Función en base a la estrategia elegida
+  estrat <- estrategias[[metodo]]
+  
   # Hacemos n repeticiones
   for (rep in 1:n) {
-    
+      
     #Creamos los vectores que guardaran las ganancias y las maquinas usadas en cada dia
     ganancia <- numeric(length = 366)
     maquina <- NULL
@@ -277,7 +280,7 @@ simulacion <- function(metodo, n = 1, param = 0.2) {
                             "upper_bound" = list(maquina, ganancia, param)
                             )
       
-      maquina_dia <- do.call(estrategias[[metodo]], argumentos)
+      maquina_dia <- do.call(estrat, argumentos)
       
       
       # una vez elegida la maquina simulamos con una bernoulli con la probabilidad de la maquina

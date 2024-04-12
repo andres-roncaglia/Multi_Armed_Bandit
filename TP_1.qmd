@@ -861,25 +861,32 @@ Desventajas de la estrategia:
 ## Comparaciones
 
 ```{r e_greedy maximizacion de epsilon}
-secuencia <- seq(0, 1, length.out = 50)
-ganancias_esperadas <- NULL
-posicion <- 0
+eps <- seq(0.075,0.35,.025)
 
-for(i in secuencia) {
-  posicion <- posicion + 1
-  temp <- simulacion("e_greedy", n = 1000, param = i)
-  ganancias_esperadas[posicion] <- round(sum(as.matrix(temp$Ganancias))/1000, 2)
-  cat(i*100, "\n")
+final <- NULL
+
+for (i in 1:length(eps)) {
+  temp <- simulacion("e_greedy",n = 1000,param = eps[i])
+  final <- cbind(final, apply(temp$Ganancias,2,sum))
 }
 
-names(ganancias_esperadas) <- secuencia
+colnames(final) <- eps
 
-ggplot() +
-  aes(x = secuencia, y = ganancias_esperadas) +
-  geom_line() +
-  geom_vline(xintercept = secuencia[which.max(ganancias_esperadas)])
+apply(final, 2, mean)
+apply(final, 2, sd)
 
-ganancias_esperadas
+for (i in 1:12) {
+  for (j in 1:12) {
+    print(mean(final[,i]>=final[,j]))
+  }
+}
+
+
+```
+Siendo X variable aleatoria que representa la ganancia total en 1 año de juego y calculando las $P(X_\epsilon<X_{\epsilon')}$ para los $\epsilon$ planteados, concluímos que el óptimo para maximisar las ganancias esperadas es $\epsilon = 0.125$
+
+```{r}
+
 ```
 
 
@@ -891,4 +898,5 @@ Nombres a las figuras y titulos a los graficos
 
 Box-plots/Histogramas con las ganancias anuales de cada maquina para las 1000 repeticiones para compararlas
 
-
+/renewcommand/tablename{Table}
+/renewcommand/figurename{Figure}
