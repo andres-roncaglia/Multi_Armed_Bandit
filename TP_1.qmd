@@ -860,8 +860,8 @@ Desventajas de la estrategia:
 
 ## Comparaciones
 
-```{r e_greedy maximizacion de epsilon}
-eps <- seq(0.075,0.35,.025)
+```{r e_greedy maximizacion de epsilon, eval=FALSE}
+eps <- seq(0.075,0.25,.025)
 
 final <- NULL
 
@@ -875,17 +875,85 @@ colnames(final) <- eps
 apply(final, 2, mean)
 apply(final, 2, sd)
 
-for (i in 1:12) {
-  for (j in 1:12) {
+for (i in 1:length(eps)) {
+  for (j in 1:length(eps)) {
     print(mean(final[,i]>=final[,j]))
   }
 }
 
 
 ```
-Siendo X variable aleatoria que representa la ganancia total en 1 año de juego y calculando las $P(X_\epsilon<X_{\epsilon')}$ para los $\epsilon$ planteados, concluímos que el óptimo para maximisar las ganancias esperadas es $\epsilon = 0.125$
+Siendo X variable aleatoria que representa la ganancia total en 1 año de juego y estimando las $P(X_\epsilon<X_{\epsilon')}$ para los $\epsilon$ planteados, concluímos que el valor que maximisa la ganancia total esperada es $\epsilon = 0.125$ REVISAR, ESTO DE LA GANANCIA ESPERADA, CREO QUE ESTÁ MAL CONCEPTUALMENTE
 
-```{r}
+```{r softmax maximisando thau, eval=FALSE}
+tau <- c(0.8,seq(1,10,1))
+
+final <- NULL
+
+for (i in 1:length(tau)) {
+  temp <- simulacion("softmax",n = 1000,param = tau[i])
+  final <- cbind(final, apply(temp$Ganancias,2,sum))
+}
+
+colnames(final) <- tau
+
+apply(final, 2, mean)
+apply(final, 2, sd)
+
+# Por como aumenta la media nos vamos a concentrar en el intervalo (0,1]
+
+tau <- c(seq(0,1,0.05))[-1]
+
+final <- NULL
+
+for (i in 1:length(tau)) {
+  temp <- simulacion("softmax",n = 1000,param = tau[i])
+  final <- cbind(final, apply(temp$Ganancias,2,sum))
+}
+
+colnames(final) <- tau
+
+apply(final, 2, mean)
+apply(final, 2, sd)
+
+
+for (i in 1:length(eps)) {
+  for (j in 1:length(eps)) {
+    print(mean(final[,i]>=final[,j]))
+  }
+}
+
+# Tau óptimo 0.1
+```
+
+
+El valor optimo de $\tau$ es 0.1
+
+```{r Comparaciones finales, eval=FALSE}
+
+estrategias_final <- NULL
+names(estrategias)
+
+for (i in 1:length(estrategias)) {
+  param <- 0.2
+  if(names(estrategias)[i] == "e_greedy"){param <- 0.125}
+  if(names(estrategias)[i] == "softmax"){param <- 0.1}
+  temp <- simulacion(names(estrategias)[i],n = 1000,param = param)
+  estrategias_final <- cbind(estrategias_final, apply(temp$Ganancias,2,sum))
+  print(paste(i,"de",length(estrategias)))
+}
+
+colnames(estrategias_final) <- names(estrategias)
+
+apply(estrategias_final,2,mean)
+apply(estrategias_final,2,sd)
+
+for (i in 1:length(estrategias)) {
+  print(mean(estrategias_final[,3]>estrategias_final[,i])  )
+}
+
+# al_azar        gcto        gcpp    e_greedy     softmax upper_bound    thompson 
+#     158.315     168.331     192.170     186.630     184.120     190.452     188.083
 
 ```
 
