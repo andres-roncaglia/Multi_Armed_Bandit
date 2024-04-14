@@ -430,7 +430,7 @@ salidas <- function(sim) {
     
     geom_hline(yintercept = 0) +
     
-    labs(y = "Ganancias acumuladas")
+    labs(y = "Unidades monetarias acumuladas")
   
   # Barplot jugadas cada maquina
   
@@ -452,7 +452,7 @@ salidas <- function(sim) {
     
     scale_fill_manual(values = c("Exito" = "palegreen3", "Fracaso" = "tomato2")) +
     
-    geom_text(aes(label = Cantidad), position = "stack", vjust = 2, show.legend = F, size = 5)
+    geom_text(aes(label = ifelse(Cantidad > max(Cantidad)*0.15, Cantidad, NA)), position = "stack", vjust = 1.5, show.legend = F, size = 3.4)
   
   
   return(list(

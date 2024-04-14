@@ -2,6 +2,7 @@
 title: "La Guía del Apostador"
 subtitle: "Trabajo Práctico Nº1"
 format: pdf
+lang: es
 toc: true
 toc-title: Indice
 echo: FALSE
@@ -53,6 +54,11 @@ Se asume además que la creencia inicial de la probabilidad de ganar para cada m
 thetas <- seq(0,1,length.out = 1000)
 
 prior <- dbeta(thetas,2,2)
+```
+
+
+```{r prior fig}
+#| fig-cap: "Distribución a priori de la probabilidad de éxito inicial para todas las máquinas."
 
 tibble(thetas, prior) |>
 
@@ -93,6 +99,11 @@ for (i in 1:n) {
 }
 
 promedio_ganancias <- mean(ganancias)
+```
+
+
+```{r primer punto fig}
+#| fig-cap: "Distribución de las unidades monetarias ganadas en un año con la máquina B."
 
 tibble(ganancias) |>
 
@@ -106,7 +117,7 @@ tibble(ganancias) |>
 
                  color = "black") +
 
-  labs(x = "Ganancias", y = "Frecuencias") +
+  labs(x = "Unidades monetarias", y = "Frecuencias") +
 
   geom_hline(yintercept = 0, color = "black", size = 0.2)
 ```
@@ -259,8 +270,7 @@ salida <- salidas(sim)
 ```
 
 ```{r al azar grafico_ganancias_acumuladas}
-#| label: fig-iris
-#| tbl-cap: "Ganancias"
+#| fig-cap: "Unidades monetarias acumuladas durante un año con la estrategia al azar."
 
 salida$grafico_ganancias_acumuladas
 ```
@@ -268,6 +278,8 @@ salida$grafico_ganancias_acumuladas
 Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
 
 ```{r al azar grafico_barplot}
+#| fig-cap: "Frecuencia, éxito y fracaso para cada máquina durante un año con la estrategia al azar."
+
 salida$grafico_barplot
 
 maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n = sum(Cantidad)) |> filter(n == max(n)) |> select(Maquina) |> as.character() 
@@ -278,6 +290,8 @@ maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n =
 
 
 ```{r al azar grafico_posteriors}
+#| fig-cap: "Probabilidades de éxito para cada máquina a posteriori luego de un año con la estrategia al azar."
+
 salida$grafico_posteriors
 ```
 
@@ -357,12 +371,16 @@ salida <- salidas(sim)
 ```
 
 ```{r gcto grafico_ganancias_acumuladas}
+#| fig-cap: "Unidades monetarias acumuladas durante un año con la estrategia greedy con tasa observada."
+
 salida$grafico_ganancias_acumuladas
 ```
 
 Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
 
 ```{r gcto grafico_barplot}
+#| fig-cap: "Frecuencia, éxito y fracaso para cada máquina durante un año con la estrategia greedy con tasa observada."
+
 salida$grafico_barplot
 
 maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n = sum(Cantidad)) |> filter(n == max(n)) |> select(Maquina) |> as.character() 
@@ -373,6 +391,8 @@ maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n =
 
 \newpage
 ```{r gcto grafico_posteriors}
+#| fig-cap: "Probabilidades de éxito para cada máquina a posteriori luego de un año con la greedy con tasa observada."
+
 salida$grafico_posteriors
 ```
 
@@ -448,12 +468,16 @@ salida <- salidas(sim)
 ```
 
 ```{r gcpp grafico_ganancias_acumuladas}
+#| fig-cap: "Unidades monetarias acumuladas durante un año con la estrategia greedy con probabilidad a posteriori."
+
 salida$grafico_ganancias_acumuladas
 ```
 
 Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
 
 ```{r gcpp grafico_barplot}
+#| fig-cap: "Frecuencia, éxito y fracaso para cada máquina durante un año con la estrategia greedy con probabilidad a posteriori."
+
 salida$grafico_barplot
 
 maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n = sum(Cantidad)) |> filter(n == max(n)) |> select(Maquina) |> as.character() 
@@ -464,6 +488,8 @@ maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n =
 
 \newpage
 ```{r gcpp grafico_posteriors}
+#| fig-cap: "Probabilidades de éxito para cada máquina a posteriori luego de un año con la estrategia greedy con probabilidad a posteriori."
+
 salida$grafico_posteriors
 ```
 
@@ -537,12 +563,16 @@ salida <- salidas(sim)
 ```
 
 ```{r e_greedy grafico_ganancias_acumuladas}
+#| fig-cap: "Unidades monetarias acumuladas durante un año con la estrategia e-greedy."
+
 salida$grafico_ganancias_acumuladas
 ```
 
 Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
 
 ```{r e_greedy grafico_barplot}
+#| fig-cap: "Frecuencia, éxito y fracaso para cada máquina durante un año con la estrategia e-greedy."
+
 salida$grafico_barplot
 
 maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n = sum(Cantidad)) |> filter(n == max(n)) |> select(Maquina) |> as.character() 
@@ -553,6 +583,8 @@ maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n =
 
 
 ```{r e_greedy grafico_posteriors}
+#| fig-cap: "Probabilidades de éxito para cada máquina a posteriori luego de un año con la estrategia e-greedy."
+
 salida$grafico_posteriors
 ```
 
@@ -637,12 +669,16 @@ salida <- salidas(sim)
 ```
 
 ```{r softmax grafico_ganancias_acumuladas}
+#| fig-cap: "Unidades monetarias acumuladas durante un año con la estrategia softmax."
+
 salida$grafico_ganancias_acumuladas
 ```
 
 Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
 
 ```{r softmax grafico_barplot}
+#| fig-cap: "Frecuencia, éxito y fracaso para cada máquina durante un año con la estrategia softmax."
+
 salida$grafico_barplot
 
 maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n = sum(Cantidad)) |> filter(n == max(n)) |> select(Maquina) |> as.character() 
@@ -653,6 +689,8 @@ maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n =
 
 
 ```{r softmax grafico_posteriors}
+#| fig-cap: "Probabilidades de éxito para cada máquina a posteriori luego de un año con la estrategia softmax."
+
 salida$grafico_posteriors
 ```
 
@@ -738,12 +776,16 @@ salida <- salidas(sim)
 ```
 
 ```{r upper-bound grafico_ganancias_acumuladas}
+#| fig-cap: "Unidades monetarias acumuladas durante un año con la estrategia upper-bound."
+
 salida$grafico_ganancias_acumuladas
 ```
 
 Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
 
 ```{r upper-bound grafico_barplot}
+#| fig-cap: "Frecuencia, éxito y fracaso para cada máquina durante un año con la estrategia upper-bound."
+
 salida$grafico_barplot
 
 maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n = sum(Cantidad)) |> filter(n == max(n)) |> select(Maquina) |> as.character() 
@@ -754,6 +796,8 @@ maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n =
 
 
 ```{r upper-bound grafico_posteriors}
+#| fig-cap: "Probabilidades de éxito para cada máquina a posteriori luego de un año con la estrategia upper-bound."
+
 salida$grafico_posteriors
 ```
 
@@ -827,12 +871,16 @@ salida <- salidas(sim)
 ```
 
 ```{r thompson grafico_ganancias_acumuladas}
+#| fig-cap: "Unidades monetarias acumuladas durante un año con la estrategia Thompson."
+
 salida$grafico_ganancias_acumuladas
 ```
 
 Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
 
 ```{r thompson grafico_barplot}
+#| fig-cap: "Frecuencia, éxito y fracaso para cada máquina durante un año con la estrategia Thompson."
+
 salida$grafico_barplot
 
 maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n = sum(Cantidad)) |> filter(n == max(n)) |> select(Maquina) |> as.character() 
@@ -843,6 +891,8 @@ maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n =
 
 
 ```{r thompson grafico_posteriors}
+#| fig-cap: "Probabilidades de éxito para cada máquina a posteriori luego de un año con la estrategia Thompson."
+
 salida$grafico_posteriors
 ```
 
@@ -966,5 +1016,5 @@ Nombres a las figuras y titulos a los graficos
 
 Box-plots/Histogramas con las ganancias anuales de cada maquina para las 1000 repeticiones para compararlas
 
-/renewcommand/tablename{Table}
-/renewcommand/figurename{Figure}
+<!-- /renewcommand/tablename{Table} -->
+<!-- /renewcommand/figurename{Figure} -->
