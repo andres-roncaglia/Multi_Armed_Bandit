@@ -145,17 +145,13 @@ source("Estrategias_y_simulacion.R")
 simulacion <- function(metodo, n = 1, param = 0.2) {
   
   if(!(metodo %in% names(estrategias))){
-    stop("El método introducido no está especificado")
-  }
+    stop("El método introducido no está especificado")}
   if(n<1 || (n != round(n))){
-    stop("La cantidad de simulaciones debe ser un número natural")
-  }
+    stop("La cantidad de simulaciones debe ser un número natural")}
   if(metodo == "softmax" && param <= 0){
-    stop("Para el método softmax el parámetro de temperatura debe ser mayor que 0")
-  }
+    stop("Para el método softmax el parámetro de temperatura debe ser mayor que 0")}
   if(metodo == "e_greedy" && (param < 0 || param > 1)){
-    stop("Para el método e-greedy el parámetro epsilon debe estar entre 0 y 1")
-  }
+    stop("Para el método e-greedy el parámetro epsilon debe estar entre 0 y 1")}
   
 ```
 :::
@@ -235,7 +231,7 @@ simulacion <- function(metodo, n = 1, param = 0.2) {
 
 :::
 
-\
+\newpage
 
 ### Completamente al azar
 
@@ -258,7 +254,7 @@ al_azar <- function() {
 
 
 :::
-\newpage
+
 Simulando los 366 días de juego:
 
 ```{r sim al azar}
@@ -297,6 +293,8 @@ salida$grafico_posteriors
 
 Y así resultan las distribuciones de la probabilidad de éxito en cada máquina a posteriori. 
 
+\newpage
+
 Ventajas de la estrategia:
 
   - No se corre el riesgo de concentrarse demasiado en una máquina que produciría menos ganancias.
@@ -304,6 +302,7 @@ Ventajas de la estrategia:
 Desventajas de la estrategia:
 
   - No tiene en cuenta la información que se adquiere a través de los días.
+
 
 \newpage
 ### Greedy con tasa observada
@@ -317,8 +316,6 @@ Para elegir la máquina con la que se va a jugar en el día se hizo uso de la si
 
 ```{r funcion gcto, echo=TRUE, eval=FALSE}
 
-
-# Greedy con tasa observada
 gcto <- function(maquina, ganancia) {
   
   # Las tazas son 0 en la primera iteracion
@@ -421,8 +418,6 @@ Para elegir la máquina con la que se va a jugar en el día se hizo uso de la si
 
 ```{r funcion gcpp, echo=TRUE, eval=FALSE}
 
-# Greedy con probabilidad a posteriori
-
 gcpp <- function(maquina, ganancia) {
   
   # Argumentos de las distribuciones de los parámetros
@@ -519,8 +514,7 @@ Para elegir la máquina con la que se va a jugar en el día se hizo uso de la si
 ## Función e_greedy
 
 ```{r funcion e_greedy, echo=TRUE, eval=FALSE}
-# e-Greedy con tasa observada
-
+  
 e_greedy <- function(maquina, ganancia, param) {
   # Las tazas son 0 en la primera iteracion
   tasa <- numeric(3)
@@ -552,6 +546,7 @@ e_greedy <- function(maquina, ganancia, param) {
 ```
 :::
 
+\newpage
 
 Dado que $\epsilon$ puede tomar cualquier valor en el intervalo $[0,1]$, mediante simulaciones buscaremos el valor de este que maximice la cantidad de unidades monetarias ganadas en un año.
 
@@ -584,7 +579,7 @@ for (i in 1:length(eps)) {
 :::
 
 
-Siendo X variable aleatoria que representa la cantidad de unidades monetarias ganadas en total en un año de juego y estimando las $P(X_\epsilon>X_{\epsilon'})$ para los $\epsilon$ planteados, concluímos que el valor de  $\epsilon/P(X_\epsilon>X_{\epsilon'})>P(X_\epsilon<X_{\epsilon'}) \ \ \ \ \forall{\epsilon'\neq\epsilon}$ es $\epsilon = 0,125$. Con este valor de $\epsilon$ es más probable obtener una mayor cantidad de unidades monetarias totales que con otros valores.
+Siendo X variable aleatoria que representa la cantidad de unidades monetarias ganadas en total en un año de juego y estimando las $P(X_\epsilon>X_{\epsilon'})$ para los $\epsilon$ planteados, concluímos que el valor de  \newline $\epsilon/P(X_\epsilon>X_{\epsilon'})>P(X_\epsilon<X_{\epsilon'}) \ \ \ \ \forall{\epsilon'\neq\epsilon}$ es $\epsilon = 0,125$. Con este valor de $\epsilon$ es más probable obtener una mayor cantidad de unidades monetarias totales que con otros valores.
 
 \newpage
 Simulando los 366 días de juego:
@@ -654,17 +649,14 @@ Para elegir la máquina con la que se va a jugar en el día se hizo uso de la si
 ## Función softmax
 
 ```{r funcion softmax, echo=TRUE, eval=FALSE}
-
-# Softmax -------------
-
 softmax <- function(maquina, ganancia, param) {
   
   # Las tasas son 0 en la primera iteracion
   tasa <- numeric(3)
   
   # Cuando una maquina no se usa ni una vez, la tasa va a seguir siendo 0
-  # Cuando se juegue al menos una vez su tasa será el numero de veces que gano en la maquina
-  # dividido la cantidad de veces que jugo con la maquina
+  # Cuando se juegue al menos una vez su tasa será el numero de veces que gano 
+  # en la maquina dividido la cantidad de veces que jugo con la maquina
   if (sum(maquina == "A") > 0) {
     tasa[1] <- sum(ganancia[maquina == "A"])/sum(maquina == "A")
   }
@@ -679,16 +671,15 @@ softmax <- function(maquina, ganancia, param) {
   names(tasa) <- c("A","B","C")
   
   # Calculo las probabilidades en base a las tasas
-  # Como tasa es un vector puedo operar como muestro abajo
   probs <- exp(tasa/param)/sum(exp(tasa/param))
-  
-  # Directamente pongo el Sample en el return para eficiencia
   
   return(sample(names(tasa),size = 1,prob = probs))
 }
 
 ```
 :::
+
+\newpage
 
 Sin embargo, el valor elegido para $\tau > 0$ puede influenciar la cantidad de unidades monetarias ganadas en un año, es por eso que es de importancia descubrir, a través de simulaciones, para que valor de $\tau$ se maximizan.
 
@@ -802,11 +793,7 @@ Para elegir la máquina con la que se va a jugar en el día se hizo uso de la si
 ## Función UB
 
 ```{r funcion upper-bound, echo=TRUE, eval=FALSE}
-
-# Upper-Bound -------------
-
 UB <- function(maquina, ganancia, param) {
-  
   # Argumentos de las distribuciones de los parámetros
   a1 <- 2; b1 <- 2; c1 <- 2; a2 <- 2; b2 <- 2; c2 <- 2
   
@@ -837,7 +824,6 @@ UB <- function(maquina, ganancia, param) {
     
   } else {
     maq <- sample(names(ls), size = 1)
-    
   }
   
   return(maq)
@@ -887,12 +873,7 @@ Y así resultan las distribuciones de la probabilidad de éxito en cada máquina
 Ventajas de la estrategia:
 
   - Utiliza la información de las tiradas anteriores.
-
-Desventajas de la estrategia:
-
-  - Suele tardar en encontrar la mejor máquina.
   
-
 
 \newpage
 ### Thompson
@@ -905,8 +886,6 @@ Para elegir la máquina con la que se va a jugar en el día se hizo uso de la si
 ## Función thompson
 
 ```{r funcion thompson, echo=TRUE, eval=FALSE}
-
-# Thompson -------------
 
 thompson <- function(maquina, ganancia) {
   
@@ -940,7 +919,7 @@ thompson <- function(maquina, ganancia) {
 ```
 :::
 
-
+\newpage
 Simulando los 366 días de juego:
 
 ```{r sim thompson}
@@ -987,7 +966,7 @@ Ventajas de la estrategia:
 
 Desventajas de la estrategia:
 
-  - Si las distribuciones a priori del parámetro no se definen adecuadamente, la estrategia puede llevar a conclusiones erróneas en períodos de tiempo que no sean suficientemente largos.
+  - Si las distribuciones a priori de las probabilidades de éxito de cada máquina no se definen adecuadamente, la estrategia puede llevar a conclusiones erróneas en períodos de tiempo que no sean suficientemente largos.
 
 \newpage
 ## Comparaciones
@@ -1029,7 +1008,6 @@ load("simulacion_final.RData")
 
 ```{r Boxplots comparaciones}
 #| fig-cap: "Boxplots comparativos de las unidades monetarias ganadas (en un año) según estrategia."
-#| fig-subcap: "El triángulo representa la media de las ganancias."
 
 
 data.frame(Estrategia = factor(rep(colnames(estrategias_final), each = 1000), levels = colnames(estrategias_final)),
@@ -1039,12 +1017,20 @@ data.frame(Estrategia = factor(rep(colnames(estrategias_final), each = 1000), le
   geom_boxplot(aes(fill = Estrategia)) +
   stat_summary(fun = mean, geom = "point", shape = 17, size = 2) +
   scale_fill_brewer(palette = "Paired") +
-  labs(y = "Unidades monetarias ganadas en un año") +
-  theme(legend.position = "none") 
+  labs(y = "Unidades monetarias ganadas en un año", caption = "El triángulo representa la media de las ganancias.") +
+  theme(legend.position = "none", plot.caption = element_text(hjust=0)) 
 
 ```
 
 Se puede ver que las estrategias con las que se obtienen mejores resultados son **Greedy con probabilidad a posteriori** y **Upper-Bound**, siendo más probable obtener mayores ganancias con la primera. Mientras que las que peor desempeño tuvieron fueron las estrategias **al azar** y **Greedy con tasa observada**.
+
+Se puede destacar que las estrategias que usan métodos bayesianos para la elección de máquinas son:
+
+  - Greedy con probabilidad a posteriori
+  - Upper-Bound
+  - Thompson
+
+Porque son los que se basan en las distribuciones a posteriori para elegir la máquina a utilizar.
 
 # Conclusión
 
