@@ -168,7 +168,7 @@ UB <- function(maquina, ganancia, param) {
     c2 <- 2 + abs(sum(ganancia[maquina == "C"] -1))
   }
   
-  # Limite superior de 95% credibilidad (Preguntar el miercoles 10/04)
+  
   ls <- c(qbeta(1 - param/2, a1, a2), qbeta(1 - param/2, b1, b2), qbeta(1 - param/2, c1, c2))
   names(ls) <- c("A","B","C")
   
@@ -452,7 +452,7 @@ salidas <- function(sim) {
     
     scale_fill_manual(values = c("Exito" = "palegreen3", "Fracaso" = "tomato2")) +
     
-    geom_text(aes(label = ifelse(Cantidad > max(Cantidad)*0.15, Cantidad, NA)), position = "stack", vjust = 1.5, show.legend = F, size = 3.4)
+    geom_text(aes(label = ifelse(Cantidad > max(Cantidad)*0.15, Cantidad, "")), position = "stack", vjust = 1.5, show.legend = F, size = 3.4)
   
   
   return(list(
