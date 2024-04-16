@@ -30,7 +30,6 @@ theme_set(theme_bw())
 
 ```
 
-\newpage
 
 # Introducción
 
