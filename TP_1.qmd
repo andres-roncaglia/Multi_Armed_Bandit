@@ -1,10 +1,6 @@
 ---
-title: "La Guía del Apostador"
-subtitle: "Trabajo Práctico Nº1"
 format: pdf
 lang: es
-toc: true
-toc-title: Indice
 echo: FALSE
 message: FALSE
 warning: FALSE
@@ -14,6 +10,9 @@ geometry:
   - right = 20mm
   - bottom = 25mm
   - heightrounded
+header-includes:
+  - \usepackage{ragged2e}
+  - \usepackage{hyperref}
 ---
 
 ```{r Carga de librerias}
@@ -30,7 +29,53 @@ theme_set(theme_bw())
 
 ```
 
+
+\Centering
+
+\vspace{3cm}
+
+```{r logo facultad, echo=F, include = T, out.width= "60%"}
+knitr::include_graphics("logounr.png")
+```
+
+\pagenumbering{gobble}
+
+\vspace{5cm}
+
+\large
+**LICENCIATURA EN ESTADÍSTICA**
+
+\vspace{1cm}
+
+\large
+**LA GUÍA DEL APOSTADOR** 
+\newline
+\vspace{0.3cm}
+\normalsize
+**"El problema del Bandido Multibrazo"**
+
+\vspace{9cm}
+
+\normalsize
+
+
+**Autores: Franco Santini - Nicolás Gamboa - Andrés Roncaglia**
+
+**Docentes: Ignacio Evangelista - Tomás Capretto**
+
+**2024**
+
 \newpage
+\hypersetup{linkcolor = black}
+\tableofcontents
+
+
+\newpage
+\pagenumbering{arabic}
+
+\RaggedRight
+\newpage
+
 # Introducción
 
 En los casinos uno de los juegos más llamativos son las máquinas tragamonedas o tragaperras. Estas son conocidas en el mundo de las apuestas por ser fuertemente adictivas y dónde las personas pierden más dinero. Con el fin de que estas personas pierdan lo menos posible se estudiará la eficacia de distintas estrategias de juego. A este problema se lo conoce como ["Bandido Multibrazo"](https://es.wikipedia.org/wiki/Bandido_multibrazo) (*Multi-armed bandit*).
@@ -55,7 +100,6 @@ thetas <- seq(0,1,length.out = 1000)
 prior <- dbeta(thetas,2,2)
 ```
 
-
 ```{r prior fig}
 #| fig-cap: "Distribución a priori de la probabilidad de éxito inicial para todas las máquinas."
 
@@ -77,14 +121,11 @@ tibble(thetas, prior) |>
 
 ```
 
-
-
 \newpage
+
 # Resultados
 
 Para obtener una noción de cuanto se ganaría en promedio en un año de juego con la mejor máquina (máquina B), se simulan 1000 secuencias de 366 juegos.
-
-
 
 ```{r primer punto}
 n <- 1000
@@ -99,7 +140,6 @@ for (i in 1:n) {
 
 promedio_ganancias <- mean(ganancias)
 ```
-
 
 ```{r primer punto fig}
 #| fig-cap: "Distribución de las unidades monetarias ganadas en un año con la máquina B."
@@ -121,20 +161,15 @@ tibble(ganancias) |>
   geom_hline(yintercept = 0, color = "black", linewidth = 0.2)
 ```
 
-
-
 Resultando `r round(promedio_ganancias, 2)` una estimación de la ganancia esperada durante un año de juego con la máquina B.
-
-
 
 ## Estrategias
 
-Sin embargo las personas no tienen información acerca de las probabilidades de éxito de las máquinas, por lo que se diseñaron un conjunto de estrategias para descubrir con cúal se obtienen mejores resultados. 
+Sin embargo las personas no tienen información acerca de las probabilidades de éxito de las máquinas, por lo que se diseñaron un conjunto de estrategias para descubrir con cúal se obtienen mejores resultados.
 
 Para esto se hacen simulaciones de los 366 días del año (o "n" años) mediante la siguiente función:
 
-
-::: {.callout-note}
+::: callout-note
 ## Función simulación
 
 ```{r funcion simulacion, echo=TRUE, eval=FALSE}
@@ -152,8 +187,9 @@ simulacion <- function(metodo, n = 1, param = 0.2) {
 ```
 :::
 
-::: {.callout-note}
-##  ‎ ‎ ‎
+::: callout-note
+## ‎ ‎ ‎
+
 ```{r funcion simulacion 2, echo=TRUE, eval=FALSE}
   # Se crean los vectores donde se guardaran las ganancias y maquinas de los 366 
   # dias para cada repeticion. Se crea tambien una futura lista llamada sim que
@@ -196,8 +232,9 @@ simulacion <- function(metodo, n = 1, param = 0.2) {
 ```
 :::
 
-::: {.callout-note}
-##  ‎ ‎ ‎
+::: callout-note
+## ‎ ‎ ‎
+
 ```{r funcion simulacion 3, echo=TRUE, eval=FALSE}
     # Se guardan en matrices las ganancias y las maquinas de los 366 dias
     # de las diferentes repeticiones
@@ -224,8 +261,6 @@ simulacion <- function(metodo, n = 1, param = 0.2) {
 }
 
 ```
-
-
 :::
 
 \newpage
@@ -240,7 +275,7 @@ Para elegir la máquina con la que se va a jugar en el día se hizo uso de la si
 source("Estrategias_y_simulacion.R")
 ```
 
-::: {.callout-note}
+::: callout-note
 ## Función al_azar
 
 ```{r funcion al azar, echo=TRUE, eval=FALSE}
@@ -251,12 +286,9 @@ al_azar <- function() {
 }
 
 ```
-
-
 :::
 
 \
-
 
 Simulando los 366 días de juego:
 
@@ -287,34 +319,33 @@ maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n =
 
 `r ifelse(length(maquina_mas_jugada) == 1, paste("La máquina más jugada fue la", maquina_mas_jugada) ,paste("Las máquinas más jugadas fueron las", paste(maquina_mas_jugada, collapse = " y ")))`
 
-
 ```{r al azar grafico_posteriors}
 #| fig-cap: "Probabilidades de éxito para cada máquina a posteriori luego de un año con la estrategia al azar."
 
 salida$grafico_posteriors
 ```
 
-Y así resultan las distribuciones de la probabilidad de éxito en cada máquina a posteriori. 
+Y así resultan las distribuciones de la probabilidad de éxito en cada máquina a posteriori.
 
 \newpage
 
 Ventajas de la estrategia:
 
-  - No se corre el riesgo de concentrarse más en una máquina que produciría menos ganancias que las demás.
-  
+-   No se corre el riesgo de concentrarse más en una máquina que produciría menos ganancias que las demás.
+
 Desventajas de la estrategia:
 
-  - No tiene en cuenta la información que se adquiere a través de los días.
-
+-   No tiene en cuenta la información que se adquiere a través de los días.
 
 \newpage
+
 ### Greedy con tasa observada
 
 La máquina con la que se juega será la que tenga la mayor tasa de éxito hasta el día en que se juega. Esta estrategia se concentra demasiado en "explotar" y casi nada en "explorar".
 
 Para elegir la máquina con la que se va a jugar en el día se hizo uso de la siguiente función:
 
-::: {.callout-note}
+::: callout-note
 ## Función gcto
 
 ```{r funcion gcto, echo=TRUE, eval=FALSE}
@@ -360,6 +391,7 @@ gcto <- function(maquina, ganancia) {
 :::
 
 \newpage
+
 Simulando los 366 días de juego:
 
 ```{r sim gcto}
@@ -390,35 +422,36 @@ maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n =
 `r ifelse(length(maquina_mas_jugada) == 1, paste("La máquina más jugada fue la", maquina_mas_jugada) ,paste("Las máquinas más jugadas fueron las", paste(maquina_mas_jugada, collapse = " y ")))`
 
 \newpage
+
 ```{r gcto grafico_posteriors}
 #| fig-cap: "Probabilidades de éxito para cada máquina a posteriori luego de un año con la estrategia greedy con tasa observada."
 
 salida$grafico_posteriors
 ```
 
-Y así resultan las distribuciones de la probabilidad de éxito en cada máquina a posteriori. 
+Y así resultan las distribuciones de la probabilidad de éxito en cada máquina a posteriori.
 
 \
 
 Ventajas de la estrategia:
 
-  - En algunos escenarios es posible elegir siempre la mejor máquina.
-  
+-   En algunos escenarios es posible elegir siempre la mejor máquina.
+
 Desventajas de la estrategia:
 
-  - Una vez que se gane con una máquina, se elegirá siempre esa misma.
-  
-  - Es posible elegir explotar la peor máquina.
+-   Una vez que se gane con una máquina, se elegirá siempre esa misma.
 
+-   Es posible elegir explotar la peor máquina.
 
 \newpage
+
 ### Greedy con probabilidad a posteriori
 
-Partiendo de las creencias iniciales, luego de cada tirada y considerando las realizadas hasta el momento, se redefinen las probabilidades de éxito esperadas de cada máquina y se selecciona la mejor. 
+Partiendo de las creencias iniciales, luego de cada tirada y considerando las realizadas hasta el momento, se redefinen las probabilidades de éxito esperadas de cada máquina y se selecciona la mejor.
 
 Para elegir la máquina con la que se va a jugar en el día se hizo uso de la siguiente función:
 
-::: {.callout-note}
+::: callout-note
 ## Función gcpp
 
 ```{r funcion gcpp, echo=TRUE, eval=FALSE}
@@ -461,6 +494,7 @@ gcpp <- function(maquina, ganancia) {
 :::
 
 \newpage
+
 Simulando los 366 días de juego:
 
 ```{r sim gcpp}
@@ -491,38 +525,38 @@ maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n =
 `r ifelse(length(maquina_mas_jugada) == 1, paste("La máquina más jugada fue la", maquina_mas_jugada) ,paste("Las máquinas más jugadas fueron las", paste(maquina_mas_jugada, collapse = " y ")))`
 
 \newpage
+
 ```{r gcpp grafico_posteriors}
 #| fig-cap: "Probabilidades de éxito para cada máquina a posteriori luego de un año con la estrategia greedy con probabilidad a posteriori."
 
 salida$grafico_posteriors
 ```
 
-Y así resultan las distribuciones de la probabilidad de éxito en cada máquina a posteriori. 
+Y así resultan las distribuciones de la probabilidad de éxito en cada máquina a posteriori.
 
 \
 
 Ventajas de la estrategia:
 
-  - Se tiene en cuenta toda la informacíon obtenida hasta el momento.
-  
-  - A comparación del método anterior, el riesgo de explotar demasiado una máquina incorrecta en mucho menor.
+-   Se tiene en cuenta toda la informacíon obtenida hasta el momento.
+
+-   A comparación del método anterior, el riesgo de explotar demasiado una máquina incorrecta en mucho menor.
 
 Desventajas de la estrategia:
 
-  - Si una buena máquina, en un principio arroja muchos fracasos seguidos, existe el riesgo de que nunca vuelva a ser elegida.
-  
-  - Aunque de manera menos frecuente que en el caso anterior, existe la posibilidad de explotar la máquina incorrecta.
-  
+-   Si una buena máquina, en un principio arroja muchos fracasos seguidos, existe el riesgo de que nunca vuelva a ser elegida.
 
+-   Aunque de manera menos frecuente que en el caso anterior, existe la posibilidad de explotar la máquina incorrecta.
 
 \newpage
+
 ### $\epsilon$-Greedy con tasa observada
 
 Se selecciona con una probabilidad $1-\epsilon$ la máquina que hasta el momento tiene la mayor tasa de éxito observada, o con una probabilidad de $\epsilon$, una al azar. $\epsilon$ es un parámetro de exploración, cuando es igual a $0$ la estrategia es igual a "Greedy con tasa observada", cuando es igual a $1$ es igual a la estrategia "Al azar".
 
 Para elegir la máquina con la que se va a jugar en el día se hizo uso de la siguiente función:
 
-::: {.callout-note}
+::: callout-note
 ## Función e_greedy
 
 ```{r funcion e_greedy, echo=TRUE, eval=FALSE}
@@ -567,7 +601,7 @@ e_greedy <- function(maquina, ganancia, param) {
 
 Dado que $\epsilon$ puede tomar cualquier valor en el intervalo $[0;1]$, mediante simulaciones buscaremos el valor de este que maximice la cantidad de unidades monetarias ganadas en un año.
 
-::: {.callout-note}
+::: callout-note
 ## Búsqueda del valor óptimo de $\epsilon$.
 
 ```{r e_greedy maximizacion, eval=FALSE, echo=TRUE}
@@ -604,10 +638,10 @@ for (i in 1:length(eps)) {
 ```
 :::
 
-
-Siendo X una variable aleatoria que representa la cantidad de unidades monetarias ganadas en total en un año de juego y estimando las $P(X_\epsilon>X_{\epsilon'})$ para los $\epsilon$ planteados, concluímos que el valor de  \newline $\epsilon/P(X_\epsilon>X_{\epsilon'})>P(X_\epsilon<X_{\epsilon'}) \ \ \ \ \forall{\epsilon'\neq\epsilon}$ es $\epsilon = 0,125$. Lo que significa que con un $\epsilon$ de $0.125$ es más probable obtener una mayor cantidad de unidades monetarias totales que con otros valores.
+Siendo X una variable aleatoria que representa la cantidad de unidades monetarias ganadas en total en un año de juego y estimando las $P(X_\epsilon>X_{\epsilon'})$ para los $\epsilon$ planteados, concluímos que el valor de \newline $\epsilon/P(X_\epsilon>X_{\epsilon'})>P(X_\epsilon<X_{\epsilon'}) \ \ \ \ \forall{\epsilon'\neq\epsilon}$ es $\epsilon = 0,125$. Lo que significa que con un $\epsilon$ de $0.125$ es más probable obtener una mayor cantidad de unidades monetarias totales que con otros valores.
 
 \newpage
+
 Simulando los 366 días de juego con un $\epsilon$ de $0.125$:
 
 ```{r sim e_greedy}
@@ -636,44 +670,43 @@ maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n =
 
 `r ifelse(length(maquina_mas_jugada) == 1, paste("La máquina más jugada fue la", maquina_mas_jugada) ,paste("Las máquinas más jugadas fueron las", paste(maquina_mas_jugada, collapse = " y ")))`
 
-
 ```{r e_greedy grafico_posteriors}
 #| fig-cap: "Probabilidades de éxito para cada máquina a posteriori luego de un año con la estrategia e-greedy."
 
 salida$grafico_posteriors
 ```
 
-Y así resultan las distribuciones de la probabilidad de éxito en cada máquina a posteriori. 
+Y así resultan las distribuciones de la probabilidad de éxito en cada máquina a posteriori.
 
 \
 
 Ventajas de la estrategia:
 
-  - La asignación del parámetro $\epsilon$ permite regular hasta que punto se prefiere explorar por sobre explotar o viceversa.
-  
-  - Con buenos valores de $\epsilon$ se obtiene un buen balance entre explotación y exploración, llevando en muchos casos a buenas ganancias.
-  
-  - La estrategia nunca comete el error de explotar una sola máquina, ya que siempre existe una probabilidad $\epsilon > 0$ de elegir una máquina al azar.
+-   La asignación del parámetro $\epsilon$ permite regular hasta que punto se prefiere explorar por sobre explotar o viceversa.
+
+-   Con buenos valores de $\epsilon$ se obtiene un buen balance entre explotación y exploración, llevando en muchos casos a buenas ganancias.
+
+-   La estrategia nunca comete el error de explotar una sola máquina, ya que siempre existe una probabilidad $\epsilon > 0$ de elegir una máquina al azar.
 
 Desventajas de la estrategia:
 
-  - Valores demasiado altos de $\epsilon$ producen un exceso de exploración y no se aprovecha la información obtenida.
-  
-  - Valores demasiado pequeños de $\epsilon$ pueden producir que se sobreexplote una mala máquina.
+-   Valores demasiado altos de $\epsilon$ producen un exceso de exploración y no se aprovecha la información obtenida.
 
+-   Valores demasiado pequeños de $\epsilon$ pueden producir que se sobreexplote una mala máquina.
 
 \newpage
+
 ### Softmax
 
-Dada la tasa observada para cada máquina ($\pi_{i}$) y el parámetro de temperatura ($\tau$) definido, se calcula una probabilidad de elegir cada una de estas utilizando la función softmax: 
+Dada la tasa observada para cada máquina ($\pi_{i}$) y el parámetro de temperatura ($\tau$) definido, se calcula una probabilidad de elegir cada una de estas utilizando la función softmax:
 
-$$Pr(i) = \frac{e^{\pi_i/\tau}}{\sum_{i = 1}^{3}{e^{\pi_i/\tau}}}$$ 
+$$Pr(i) = \frac{e^{\pi_i/\tau}}{\sum_{i = 1}^{3}{e^{\pi_i/\tau}}}$$
 
 Donde $i$ representa a las máquinas y $\tau$ a diferencia del método $\epsilon$-greedy, en el cual el parámetro determina la probabilidad de explorar o explotar, en este caso determina, de manera inversa, el peso que tendrán las tasas de éxitos observadas hasta el momento de cada máquina al calcular las probabilidades de elegir cada una de estas.
 
 Para elegir la máquina con la que se va a jugar en el día se hizo uso de la siguiente función:
 
-::: {.callout-note}
+::: callout-note
 ## Función softmax
 
 ```{r funcion softmax, echo=TRUE, eval=FALSE}
@@ -711,7 +744,7 @@ softmax <- function(maquina, ganancia, param) {
 
 Sin embargo, el valor elegido para $\tau > 0$ puede influenciar la cantidad de unidades monetarias ganadas en un año, es por eso que es de importancia descubrir, a través de simulaciones, para que valor de $\tau$ se maximizan.
 
-::: {.callout-note}
+::: callout-note
 ## Búsqueda del valor óptimo de $\tau$.
 
 ```{r softmax maximisando thau, eval=FALSE, echo=TRUE}
@@ -790,37 +823,37 @@ maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n =
 
 `r ifelse(length(maquina_mas_jugada) == 1, paste("La máquina más jugada fue la", maquina_mas_jugada) ,paste("Las máquinas más jugadas fueron las", paste(maquina_mas_jugada, collapse = " y ")))`
 
-
 ```{r softmax grafico_posteriors}
 #| fig-cap: "Probabilidades de éxito para cada máquina a posteriori luego de un año con la estrategia softmax."
 
 salida$grafico_posteriors
 ```
 
-Y así resultan las distribuciones de la probabilidad de éxito en cada máquina a posteriori. 
+Y así resultan las distribuciones de la probabilidad de éxito en cada máquina a posteriori.
 
 \
 
 Ventajas de la estrategia:
 
-  - Al igual que la estrategia "$\epsilon$-greedy", se le puede asignar valores al parámetro $\tau$ para lograr un equilibrio entre exploración y explotación, y así lograr mayores ganancias.
-  
-  - Hace uso de la información de las tiradas anteriores.
-  
+-   Al igual que la estrategia "$\epsilon$-greedy", se le puede asignar valores al parámetro $\tau$ para lograr un equilibrio entre exploración y explotación, y así lograr mayores ganancias.
+
+-   Hace uso de la información de las tiradas anteriores.
+
 Desventajas de la estrategia:
 
-  - Para valores de $\tau$ muy cercanos a cero, se corre el riesgo de sobreexplotar una máquina 
+-   Para valores de $\tau$ muy cercanos a cero, se corre el riesgo de sobreexplotar una máquina
 
-  - Cuando $\tau \rightarrow \infty$, la estrategia tiende a elegir máquinas al azar.
+-   Cuando $\tau \rightarrow \infty$, la estrategia tiende a elegir máquinas al azar.
 
 \newpage
+
 ### Upper-Bound
 
 Se selecciona la máquina que tenga el mayor límite superior, en un intervalo de credibilidad centrado, del 95% de probabilidad.
 
 Para elegir la máquina con la que se va a jugar en el día se hizo uso de la siguiente función:
 
-::: {.callout-note}
+::: callout-note
 ## Función UB
 
 ```{r funcion upper-bound, echo=TRUE, eval=FALSE}
@@ -866,7 +899,7 @@ UB <- function(maquina, ganancia, param) {
 ```
 :::
 
-\newpage 
+\newpage
 
 Simulando los 366 días de juego:
 
@@ -895,30 +928,29 @@ maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n =
 
 `r ifelse(length(maquina_mas_jugada) == 1, paste("La máquina más jugada fue la", maquina_mas_jugada) ,paste("Las máquinas más jugadas fueron las", paste(maquina_mas_jugada, collapse = " y ")))`
 
-
 ```{r upper-bound grafico_posteriors}
 #| fig-cap: "Probabilidades de éxito para cada máquina a posteriori luego de un año con la estrategia upper-bound."
 
 salida$grafico_posteriors
 ```
 
-Y así resultan las distribuciones de la probabilidad de éxito en cada máquina a posteriori. 
+Y así resultan las distribuciones de la probabilidad de éxito en cada máquina a posteriori.
 
 \
 
 Ventajas de la estrategia:
 
-  - Utiliza la información de las tiradas anteriores.
-  
+-   Utiliza la información de las tiradas anteriores.
 
 \newpage
+
 ### Thompson
 
 Se extrae una muestra de la distribución a posteriori de las probabilidades de éxito de cada máquina y se juega con la que se obtenga la muestra más grande.
 
 Para elegir la máquina con la que se va a jugar en el día se hizo uso de la siguiente función:
 
-::: {.callout-note}
+::: callout-note
 ## Función thompson
 
 ```{r funcion thompson, echo=TRUE, eval=FALSE}
@@ -959,6 +991,7 @@ thompson <- function(maquina, ganancia) {
 :::
 
 \newpage
+
 Simulando los 366 días de juego:
 
 ```{r sim thompson}
@@ -988,28 +1021,28 @@ maquina_mas_jugada <- salida$tabla_barplot |> group_by(Maquina) |> summarise(n =
 
 `r ifelse(length(maquina_mas_jugada) == 1, paste("La máquina más jugada fue la", maquina_mas_jugada) ,paste("Las máquinas más jugadas fueron las", paste(maquina_mas_jugada, collapse = " y ")))`
 
-
 ```{r thompson grafico_posteriors}
 #| fig-cap: "Probabilidades de éxito para cada máquina a posteriori luego de un año con la estrategia Thompson."
 
 salida$grafico_posteriors
 ```
 
-Y así resultan las distribuciones de la probabilidad de éxito en cada máquina a posteriori. 
+Y así resultan las distribuciones de la probabilidad de éxito en cada máquina a posteriori.
 
 \
 
 Ventajas de la estrategia:
 
-  - Utiliza la información de las tiradas anteriores.
-  
-  - A medida que pasan los días, la estrategia eligirá con mayor frecuencia a la mejor máquina.
+-   Utiliza la información de las tiradas anteriores.
+
+-   A medida que pasan los días, la estrategia eligirá con mayor frecuencia a la mejor máquina.
 
 Desventajas de la estrategia:
 
-  - Si las distribuciones a priori de las probabilidades de éxito de cada máquina no se definen adecuadamente, la estrategia puede llevar a conclusiones erróneas en períodos de tiempo que no sean suficientemente largos.
+-   Si las distribuciones a priori de las probabilidades de éxito de cada máquina no se definen adecuadamente, la estrategia puede llevar a conclusiones erróneas en períodos de tiempo que no sean suficientemente largos.
 
 \newpage
+
 ## Comparaciones
 
 Luego de presentar todas las estrategias es lógico hacerse la pregunta ¿pero cúal método es el mejor? Para responder a esto se comparan las ganancias anuales de 1000 simulaciones en un año de juego.
@@ -1042,10 +1075,10 @@ mean(estrategias_final[,3]>estrategias_final[,6])
 # al_azar        gcto        gcpp    e_greedy     softmax upper_bound    thompson 
 #     158.315     168.331     192.170     186.630     184.120     190.452     188.083
 ```
+
 ```{r carga de simulacion final}
 load("simulacion_final.RData")
 ```
-
 
 ```{r Boxplots comparaciones}
 #| fig-cap: "Boxplots comparativos de las unidades monetarias ganadas (en un año) según estrategia."
@@ -1067,16 +1100,15 @@ Se puede ver que las estrategias con las que se obtienen mejores resultados son 
 
 Se puede destacar que las estrategias que usan métodos bayesianos para la elección de máquinas son:
 
-  - Greedy con probabilidad a posteriori
-  - Upper-Bound
-  - Thompson
+-   Greedy con probabilidad a posteriori
+-   Upper-Bound
+-   Thompson
 
 Porque son los que se basan en las distribuciones a posteriori para elegir la máquina a utilizar.
 
 # Conclusión
 
 Si bien el presente estudio no busca generar la falsa ilusión de que es posible generar grandes ganancias con máquinas tragamonedas (tragaperras) es interesante desde el punto de vista de la estadistica bayesiana estudiar distintas tecnicas y ver cual es la que resuelve de mejor manera la problematica del ["bandido multibrazo"](https://es.wikipedia.org/wiki/Bandido_multibrazo). Se llegó a la conclusión de que la estrategia a seguir para maximizar la probabilidad de obtener mayores ganancias, es **Greedy con probabilidad a posteriori**.
-
 
 # Anexo
 
