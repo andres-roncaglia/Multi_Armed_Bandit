@@ -42,29 +42,28 @@ knitr::include_graphics("logounr.png")
 
 \vspace{5cm}
 
-\large
+\Large
 **LICENCIATURA EN ESTADÍSTICA**
 
 \vspace{1cm}
 
-\large
+\Large
 **LA GUÍA DEL APOSTADOR** 
 \newline
 \vspace{0.3cm}
-\normalsize
+\large
 **"El problema del Bandido Multibrazo"**
 
 \vspace{9cm}
 
-\normalsize
+\large
 
-
-**Autores: Franco Santini - Nicolás Gamboa - Andrés Roncaglia**
+**Autores: Franco Santini - Nicolas Gamboa - Andrés Roncaglia**
 
 **Docentes: Ignacio Evangelista - Tomás Capretto**
 
 **2024**
-
+\normalsize
 \newpage
 \hypersetup{linkcolor = black}
 \tableofcontents
