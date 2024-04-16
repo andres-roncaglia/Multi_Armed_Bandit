@@ -587,7 +587,7 @@ for (i in 1:length(eps)) {
 # Se nombran las columnas según el epsilon con el que se hicieron las simulaciones
 colnames(final) <- eps
 
-# Se obserban las medias y los desvios
+# Se observan las medias y los desvios
 apply(final, 2, mean)
 apply(final, 2, sd)
 
@@ -645,6 +645,8 @@ salida$grafico_posteriors
 
 Y así resultan las distribuciones de la probabilidad de éxito en cada máquina a posteriori. 
 
+\
+
 Ventajas de la estrategia:
 
   - La asignación del parámetro $\epsilon$ permite regular hasta que punto se prefiere explorar por sobre explotar o viceversa.
@@ -696,7 +698,7 @@ softmax <- function(maquina, ganancia, param) {
   # Se asigna el nombre de la maquina para cada tasa
   names(tasa) <- c("A","B","C")
   
-  # Calculo las probabilidades en base a las tasas
+  # Se calculan las probabilidades en base a las tasas
   probs <- exp(tasa/param)/sum(exp(tasa/param))
   
   return(sample(names(tasa),size = 1,prob = probs))
@@ -710,51 +712,52 @@ softmax <- function(maquina, ganancia, param) {
 Sin embargo, el valor elegido para $\tau > 0$ puede influenciar la cantidad de unidades monetarias ganadas en un año, es por eso que es de importancia descubrir, a través de simulaciones, para que valor de $\tau$ se maximizan.
 
 ::: {.callout-note}
-## Maximización de $\tau$
+## Busqueda del valor óptimo de $\tau$
 
 ```{r softmax maximisando thau, eval=FALSE, echo=TRUE}
+# Se prueban varios valores de tau
 tau <- c(0.8,seq(1,10,1))
-
 final <- NULL
 
+# Para cada tau se hacen mil simulaciones de un año de 366 días
 for (i in 1:length(tau)) {
   temp <- simulacion("softmax",n = 1000,param = tau[i])
   final <- cbind(final, apply(temp$Ganancias,2,sum))
 }
-
 colnames(final) <- tau
 
+# Se calculan las medias y desvios
 apply(final, 2, mean)
 apply(final, 2, sd)
 
-# Por como aumenta la media nos vamos a concentrar en el intervalo (0,1]
-
+# Se prueban valores en intervalos mas chicos
 tau <- c(seq(0,1,0.05))[-1]
-
 final <- NULL
 
+# Para cada tau se hacen mil simulaciones de un año de 366 días
 for (i in 1:length(tau)) {
   temp <- simulacion("softmax",n = 1000,param = tau[i])
   final <- cbind(final, apply(temp$Ganancias,2,sum))
 }
-
 colnames(final) <- tau
 
+# Se calculan las medias y desvios
 apply(final, 2, mean)
 apply(final, 2, sd)
 
-
+# Se calcula la probabilidad de que las ganancias obtenidas en un año con un tau
+# sean mayores que con otro y nos quedamos con aquel con el que sea más probable
+# obtener mayores ganancias
 for (i in 1:length(eps)) {
   for (j in 1:length(eps)) {
     print(mean(final[,i]>=final[,j]))
   }
 }
 
-# Tau óptimo 0.1
 ```
 :::
 
-Se puede concluir que se una tiene mayor probabildad de obtener más unidades monetarias en un año de juego con un $\tau$ de 0,1.
+Se puede concluir que se tiene una mayor probabildad de obtener más unidades monetarias en un año de juego con un $\tau$ de 0,1.
 
 \newpage
 
@@ -796,6 +799,8 @@ salida$grafico_posteriors
 
 Y así resultan las distribuciones de la probabilidad de éxito en cada máquina a posteriori. 
 
+\
+
 Ventajas de la estrategia:
 
   - Al igual que la estrategia "$\epsilon$-greedy", se le puede asignar valores al parámetro $\tau$ para lograr un equilibrio entre exploración y explotación, y así lograr mayores ganancias.
@@ -823,6 +828,8 @@ UB <- function(maquina, ganancia, param) {
   # Argumentos de las distribuciones de los parámetros
   a1 <- 2; b1 <- 2; c1 <- 2; a2 <- 2; b2 <- 2; c2 <- 2
   
+  # Si hay al menos una tirada con la máquina, modifica los parámetros de la
+  # distribución a posteriori según corresponda
   if (sum(maquina == "A") > 0) {
     a1 <- 2 + sum(ganancia[maquina == "A"])
     a2 <- 2 + abs(sum(ganancia[maquina == "A"] -1))
@@ -836,12 +843,13 @@ UB <- function(maquina, ganancia, param) {
     c2 <- 2 + abs(sum(ganancia[maquina == "C"] -1))
   }
   
-  # Limite superior de 95% credibilidad
+  # Limite superior de 1-param% credibilidad
   ls <- c(qbeta(1 - param/2, a1, a2), qbeta(1 - param/2, b1, b2),
           qbeta(1 - param/2, c1, c2))
   names(ls) <- c("A","B","C")
   
-  # Para elegir el limite superior mayor
+  # Se elige la maquina que tenga el mayor limite de credibilidad o una
+  # al azar entre las que compartan el mayor valor
   if (sum(ls == max(ls)) == 1) {
     maq <- names(which.max(ls))
     
@@ -896,6 +904,8 @@ salida$grafico_posteriors
 
 Y así resultan las distribuciones de la probabilidad de éxito en cada máquina a posteriori. 
 
+\
+
 Ventajas de la estrategia:
 
   - Utiliza la información de las tiradas anteriores.
@@ -918,6 +928,8 @@ thompson <- function(maquina, ganancia) {
   # Argumentos de las distribuciones de los parámetros
   a1 <- 2; b1 <- 2; c1 <- 2; a2 <- 2; b2 <- 2; c2 <- 2
   
+  # Si hay al menos una tirada con la máquina, modifica los parámetros de la
+  # distribución a posteriori según corresponda
   if (sum(maquina == "A") > 0) {
     a1 <- 2 + sum(ganancia[maquina == "A"])
     a2 <- 2 + abs(sum(ganancia[maquina == "A"] -1))
@@ -932,13 +944,14 @@ thompson <- function(maquina, ganancia) {
   }
   
   
-  # Tomo una muestra de cada theta
+  # Se toma una muestra de la distribución a posteriori de cada máquina
   muestras <- c(rbeta(1, a1, a2), rbeta(1, b1, b2), rbeta(1, c1, c2))
-  # parametros mayores.
   
+  # Se nombran las valores obtenidos según de que máquina se obtuvieron
   names(muestras) <- c("A","B","C")
-  # Devuelvo la más grande
   
+  # Se elige la máquina de la cual se obtuvo el mayor valor de su distribución
+  # a posteriori
   return(names(muestras[which.max(muestras)]))
   
 }
@@ -983,6 +996,8 @@ salida$grafico_posteriors
 ```
 
 Y así resultan las distribuciones de la probabilidad de éxito en cada máquina a posteriori. 
+
+\
 
 Ventajas de la estrategia:
 
