@@ -166,7 +166,7 @@ Resultando `r round(promedio_ganancias, 2)` una estimación de la ganancia esper
 
 Sin embargo las personas no tienen información acerca de las probabilidades de éxito de las máquinas, por lo que se diseñaron un conjunto de estrategias para descubrir con cúal se obtienen mejores resultados.
 
-Para esto se hacen simulaciones de los 366 días del año (o "n" años) mediante la siguiente función:
+Para esto se hacen $n$ simulaciones de los $366$ días del año mediante la siguiente función:
 
 ::: callout-note
 ## Función simulación
@@ -539,7 +539,7 @@ Ventajas de la estrategia:
 
 -   Se tiene en cuenta toda la informacíon obtenida hasta el momento.
 
--   A comparación del método anterior, el riesgo de explotar demasiado una máquina incorrecta en mucho menor.
+-   A comparación del método anterior, el riesgo de explotar demasiado una máquina incorrecta es mucho menor.
 
 Desventajas de la estrategia:
 
@@ -551,7 +551,7 @@ Desventajas de la estrategia:
 
 ### $\epsilon$-Greedy con tasa observada
 
-Se selecciona con una probabilidad $1-\epsilon$ la máquina que hasta el momento tiene la mayor tasa de éxito observada, o con una probabilidad de $\epsilon$, una al azar. $\epsilon$ es un parámetro de exploración, cuando es igual a $0$ la estrategia es igual a "Greedy con tasa observada", cuando es igual a $1$ es igual a la estrategia "Al azar".
+Se selecciona con una probabilidad de $1-\epsilon$ la máquina que hasta el momento tiene la mayor tasa de éxito observada, o con una probabilidad de $\epsilon$, una al azar. $\epsilon$ es un parámetro de exploración, cuando es igual a $0$ la estrategia es igual a "Greedy con tasa observada", cuando es igual a $1$ es igual a la estrategia "Al azar".
 
 Para elegir la máquina con la que se va a jugar en el día se hizo uso de la siguiente función:
 
@@ -701,7 +701,7 @@ Dada la tasa observada para cada máquina ($\pi_{i}$) y el parámetro de tempera
 
 $$Pr(i) = \frac{e^{\pi_i/\tau}}{\sum_{i = 1}^{3}{e^{\pi_i/\tau}}}$$
 
-Donde $i$ representa a las máquinas y $\tau$ a diferencia del método $\epsilon$-greedy, en el cual el parámetro determina la probabilidad de explorar o explotar, en este caso determina, de manera inversa, el peso que tendrán las tasas de éxitos observadas hasta el momento de cada máquina al calcular las probabilidades de elegir cada una de estas.
+Donde $i$ representa a las máquinas y $\tau$, a diferencia del método $\epsilon$-greedy, en el cual el parámetro determina la probabilidad de explorar o explotar. $\tau$ determina de manera inversa el peso que tendrán las tasas de éxitos observadas hasta el momento de cada máquina al calcular las probabilidades de elegir cada una de estas.
 
 Para elegir la máquina con la que se va a jugar en el día se hizo uso de la siguiente función:
 
@@ -789,7 +789,7 @@ for (i in 1:length(eps)) {
 ```
 :::
 
-Se puede concluir que se una tiene mayor probabildad de obtener más unidades monetarias en un año de juego con un $\tau$ de $0,1$.
+Se puede concluir que se tiene una mayor probabildad de obtener más unidades monetarias en un año de juego con un $\tau$ de $0,1$.
 
 \newpage
 
@@ -848,7 +848,7 @@ Desventajas de la estrategia:
 
 ### Upper-Bound
 
-Se selecciona la máquina que tenga el mayor límite superior, en un intervalo de credibilidad centrado, del 95% de probabilidad.
+Se selecciona la máquina que tenga el mayor límite superior, en un intervalo de credibilidad centrado (construido a partir de la distribución a posteriori de $\theta$), del 95% de probabilidad.
 
 Para elegir la máquina con la que se va a jugar en el día se hizo uso de la siguiente función:
 
@@ -939,7 +939,8 @@ Y así resultan las distribuciones de la probabilidad de éxito en cada máquina
 
 Ventajas de la estrategia:
 
--   Utiliza la información de las tiradas anteriores.
+  - Utiliza la información de las tiradas anteriores.
+
 
 \newpage
 
@@ -1032,13 +1033,13 @@ Y así resultan las distribuciones de la probabilidad de éxito en cada máquina
 
 Ventajas de la estrategia:
 
--   Utiliza la información de las tiradas anteriores.
-
--   A medida que pasan los días, la estrategia eligirá con mayor frecuencia a la mejor máquina.
+  - Utiliza la información de las tiradas anteriores.
+  
+  - A pesar de que la tasa de éxito de una máquina sea mucho mayor que las demás, al estar generando valores aleatorios siempre existe la posibilidad de seguir explotando, aunque sea más probable explotar
 
 Desventajas de la estrategia:
 
--   Si las distribuciones a priori de las probabilidades de éxito de cada máquina no se definen adecuadamente, la estrategia puede llevar a conclusiones erróneas en períodos de tiempo que no sean suficientemente largos.
+  - Si las distribuciones a priori de las probabilidades de éxito de cada máquina no se definen adecuadamente, la estrategia puede llevar a conclusiones erróneas en períodos de tiempo que no sean suficientemente largos.
 
 \newpage
 
@@ -1103,7 +1104,7 @@ Se puede destacar que las estrategias que usan métodos bayesianos para la elecc
 -   Upper-Bound
 -   Thompson
 
-Porque son los que se basan en las distribuciones a posteriori para elegir la máquina a utilizar.
+Porque son las que se basan en las distribuciones a posteriori para elegir la máquina a utilizar.
 
 # Conclusión
 
