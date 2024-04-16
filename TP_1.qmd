@@ -30,58 +30,6 @@ theme_set(theme_bw())
 
 ```
 
-\allsectionsfont{\centering}
-
-\subsectionfont{\raggedright}
-
-\subsubsectionfont{\raggedright}
-
-\pagenumbering{gobble}
-
-\begin{centering}
-
-\vspace{3cm}
-
-```{r logo facultad, echo=F, include = T, out.width="80%"}
-knitr::include_graphics("logounr.png")
-```
-
-\vspace{3cm}
-
-\large
-{\bf LICENCIATURA EN ESTADÍSTICA}
-
-\vspace{1cm}
-
-\large
-{\bf LA GUÍA DEL APOSTADOR} \\
-\vspace{0.3cm}
-\normalsize
-{\bf "El problema del Bandido Multibrazo"}
-
-\vspace{13cm}
-
-\normalsize
-
-\doublespacing
-{\bf Autores: Franco Santini - Nicolas Gamboa - Andres Roncaglia \\ Docentes: Ignacio Evangelista - Tomás Capretto \\ 2024}
-
-\end{centering}
-
-\newpage
-
-
-\centering
-\raggedright
-\tableofcontents
-
-
-\newpage
-\pagenumbering{arabic}
-\allsectionsfont{\raggedright}
-\normalsize
-
-\newpage
 
 # Introducción
 
