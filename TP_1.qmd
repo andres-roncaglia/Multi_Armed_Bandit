@@ -30,7 +30,7 @@ theme_set(theme_bw())
 
 ```
 
-
+\newpage
 # Introducción
 
 En los casinos uno de los juegos más llamativos son las máquinas tragamonedas o tragaperras. Estas son conocidas en el mundo de las apuestas por ser fuertemente adictivas y dónde las personas pierden más dinero. Con el fin de que estas personas pierdan lo menos posible se estudiará la eficacia de distintas estrategias de juego. A este problema se lo conoce como ["Bandido Multibrazo"](https://es.wikipedia.org/wiki/Bandido_multibrazo) (*Multi-armed bandit*).
@@ -518,7 +518,7 @@ Desventajas de la estrategia:
 \newpage
 ### $\epsilon$-Greedy con tasa observada
 
-Se selecciona con una probabilidad $1-\epsilon$ si usar la máquina que hasta el momento tiene la mayor tasa de éxito observada, o con una probabilidad de $\epsilon$, una al azar. $\epsilon$ es un parámetro de exploración, cuando es igual a $0$ la estrategia es igual a "Greedy con tasa observada", cuando es igual a $1$ es igual a la estrategia "Al azar".
+Se selecciona con una probabilidad $1-\epsilon$ la máquina que hasta el momento tiene la mayor tasa de éxito observada, o con una probabilidad de $\epsilon$, una al azar. $\epsilon$ es un parámetro de exploración, cuando es igual a $0$ la estrategia es igual a "Greedy con tasa observada", cuando es igual a $1$ es igual a la estrategia "Al azar".
 
 Para elegir la máquina con la que se va a jugar en el día se hizo uso de la siguiente función:
 
@@ -568,9 +568,9 @@ e_greedy <- function(maquina, ganancia, param) {
 Dado que $\epsilon$ puede tomar cualquier valor en el intervalo $[0;1]$, mediante simulaciones buscaremos el valor de este que maximice la cantidad de unidades monetarias ganadas en un año.
 
 ::: {.callout-note}
-## Maximización de $\epsilon$
+## Búsqueda del valor óptimo de $\epsilon$.
 
-```{r e_greedy maximizacion de epsilon, eval=FALSE, echo=TRUE}
+```{r e_greedy maximizacion, eval=FALSE, echo=TRUE}
 # Se seleccionan unos cuantos epsilons a probar
 eps <- seq(0.075,0.25,.025)
 
@@ -712,7 +712,7 @@ softmax <- function(maquina, ganancia, param) {
 Sin embargo, el valor elegido para $\tau > 0$ puede influenciar la cantidad de unidades monetarias ganadas en un año, es por eso que es de importancia descubrir, a través de simulaciones, para que valor de $\tau$ se maximizan.
 
 ::: {.callout-note}
-## Busqueda del valor óptimo de $\tau$
+## Búsqueda del valor óptimo de $\tau$.
 
 ```{r softmax maximisando thau, eval=FALSE, echo=TRUE}
 # Se prueban varios valores de tau
@@ -757,7 +757,7 @@ for (i in 1:length(eps)) {
 ```
 :::
 
-Se puede concluir que se tiene una mayor probabildad de obtener más unidades monetarias en un año de juego con un $\tau$ de 0,1.
+Se puede concluir que se una tiene mayor probabildad de obtener más unidades monetarias en un año de juego con un $\tau$ de $0,1$.
 
 \newpage
 
