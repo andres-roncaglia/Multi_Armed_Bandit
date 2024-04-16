@@ -34,9 +34,9 @@ theme_set(theme_bw())
 
 # Introducción
 
-En los casinos uno de los juegos más llamativos son las máquinas tragamonedas o tragaperras. Son conocidas por ser exageradamente adictivas incluso en el mundo de las apuestas y en las cuales las personas pierden más dinero. Con el fin de que estas personas pierdan menos dinero se estudiará la eficacia de distintas estrategias de juego. A este problema se lo conoce como ["Bandido Multibrazo"](https://es.wikipedia.org/wiki/Bandido_multibrazo) (*Multi armed bandit*).
+En los casinos uno de los juegos más llamativos son las máquinas tragamonedas o tragaperras. Estas son conocidas en el mundo de las apuestas por ser fuertemente adictivas y dónde las personas pierden más dinero. Con el fin de que estas personas pierdan lo menos posible se estudiará la eficacia de distintas estrategias de juego. A este problema se lo conoce como ["Bandido Multibrazo"](https://es.wikipedia.org/wiki/Bandido_multibrazo) (*Multi-armed bandit*).
 
-La principal incógnita se encuentra en descubrir hasta que punto conviene "explotar" por sobre "explorar" o viceversa. Donde explotar refiere a dar prioridad a elegir lo que se sabe que funciona, mientras que explorar refiere a ser propenso a salir de la "zona de confort" y buscar nuevas alternativas.
+La principal incógnita se encuentra en descubrir hasta que punto conviene "explotar" por sobre "explorar" o viceversa. Donde explotar refiere a dar prioridad a elegir lo que uno sabe o cree que sabe que funciona, mientras que explorar refiere a ser propenso a salir de la "zona de confort" y buscar nuevas alternativas.
 
 # Metodología
 
@@ -72,9 +72,9 @@ tibble(thetas, prior) |>
 
   labs(x = expression(theta), y = "Probabilidad") +
 
-  geom_hline(yintercept = 0, color = "black", size = 0.2) +
+  geom_hline(yintercept = 0, color = "black", linewidth = 0.2) +
 
-  geom_vline(xintercept = 0, color = "black", size = 0.2)
+  geom_vline(xintercept = 0, color = "black", linewidth = 0.2)
 
 ```
 
@@ -117,9 +117,9 @@ tibble(ganancias) |>
 
                  color = "black") +
 
-  labs(x = "Unidades monetarias", y = "Frecuencias") +
+  labs(x = "Unidades monetarias", y = "Frecuencias absolutas") +
 
-  geom_hline(yintercept = 0, color = "black", size = 0.2)
+  geom_hline(yintercept = 0, color = "black", linewidth = 0.2)
 ```
 
 
@@ -133,9 +133,7 @@ Resultando `r round(promedio_ganancias, 2)` una estimación de la ganancia esper
 Sin embargo las personas no tienen información acerca de las probabilidades de éxito de las máquinas, por lo que se diseñaron un conjunto de estrategias para descubrir con cúal se obtienen mejores resultados. 
 
 Para esto se hacen simulaciones de los 366 días del año (o "n" años) mediante la siguiente función:
-```{r cargamos las funciones}
-source("Estrategias_y_simulacion.R")
-```
+
 
 ::: {.callout-note}
 ## Función simulación
@@ -235,9 +233,13 @@ simulacion <- function(metodo, n = 1, param = 0.2) {
 
 ### Completamente al azar
 
-Consiste en elegir cada día una máquina cualquiera sin importar los resultados que se hayan obtenido en el día anterior. Esta estrategia se concentra únicamente en "explorar" pero nunca considera "explotar" como una posibilidad.
+Consiste en elegir cada día una máquina al azar sin importar los resultados que se hayan obtenido en el día anterior. Esta estrategia se concentra únicamente en "explorar" pero nunca considera "explotar" como una posibilidad.
 
 Para elegir la máquina con la que se va a jugar en el día se hizo uso de la siguiente función:
+
+```{r cargamos las funciones}
+source("Estrategias_y_simulacion.R")
+```
 
 ::: {.callout-note}
 ## Función al_azar
@@ -299,7 +301,7 @@ Y así resultan las distribuciones de la probabilidad de éxito en cada máquina
 
 Ventajas de la estrategia:
 
-  - No se corre el riesgo de concentrarse demasiado en una máquina que produciría menos ganancias.
+  - No se corre el riesgo de concentrarse más en una máquina que produciría menos ganancias que las demás.
   
 Desventajas de la estrategia:
 
@@ -431,15 +433,15 @@ gcpp <- function(maquina, ganancia) {
   # distribución a posteriori según corresponda
   if (sum(maquina == "A") > 0) {
     a1 <- 2 + sum(ganancia[maquina == "A"])
-    a2 <- 2 + abs(sum(ganancia[maquina == "A"] -1))
+    a2 <- 2 + abs(sum(ganancia[maquina == "A"] - 1))
   }
   if (sum(maquina == "B") > 0) {
     b1 <- 2 + sum(ganancia[maquina == "B"])
-    b2 <- 2 + abs(sum(ganancia[maquina == "B"] -1))
+    b2 <- 2 + abs(sum(ganancia[maquina == "B"] - 1))
   }
   if (sum(maquina == "C") > 0) {
     c1 <- 2 + sum(ganancia[maquina == "C"])
-    c2 <- 2 + abs(sum(ganancia[maquina == "C"] -1))
+    c2 <- 2 + abs(sum(ganancia[maquina == "C"] - 1))
   }
   
   # Se redefinen las probabilidades de éxito esperadas de cada máquina
@@ -504,13 +506,14 @@ Ventajas de la estrategia:
 
   - Se tiene en cuenta toda la informacíon obtenida hasta el momento.
   
-  - No se concentra demasiado pronto en explotar.
+  - A comparación del método anterior, el riesgo de explotar demasiado una máquina incorrecta en mucho menor.
 
 Desventajas de la estrategia:
 
-  - Explora únicamente en los primeros días.
+  - Si una buena máquina, en un principio arroja muchos fracasos seguidos, existe el riesgo de que nunca vuelva a ser elegida.
   
-  - Aunque de manera menos frecuente que en el caso anterior, suele explotar la máquina incorrecta.
+  - Aunque de manera menos frecuente que en el caso anterior, existe la posibilidad de explotar la máquina incorrecta.
+  
 
 
 \newpage
