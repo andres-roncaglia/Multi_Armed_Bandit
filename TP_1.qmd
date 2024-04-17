@@ -940,7 +940,12 @@ Y así resultan las distribuciones de la probabilidad de éxito en cada máquina
 Ventajas de la estrategia:
 
   - Utiliza la información de las tiradas anteriores.
+  
+  - En el largo plazo, la estrategia tiende únicamente a explotar, esto suele ser algo positivo dado el proceso de exploración del principio.
 
+Desventajas de la estrategia: 
+
+  - En el corto plazo la estrategia se concentra mucho en explorar y poco en explotar, ya que cuando se comienza a explotar una máquina, el desvío disminuye, por lo que el límite superior tiende a moverse hacia valores más pequeños.
 
 \newpage
 
