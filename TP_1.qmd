@@ -77,7 +77,7 @@ knitr::include_graphics("logounr.png")
 
 # Introducción
 
-En los casinos uno de los juegos más llamativos son las máquinas tragamonedas o tragaperras. Estas son conocidas en el mundo de las apuestas por ser fuertemente adictivas y dónde las personas pierden más dinero. Con el fin de que estas personas pierdan lo menos posible se estudiará la eficacia de distintas estrategias de juego. A este problema se lo conoce como ["Bandido Multibrazo"](https://es.wikipedia.org/wiki/Bandido_multibrazo) (*Multi-armed bandit*).
+En los casinos uno de los juegos más llamativos son las máquinas tragamonedas o tragaperras. Estas son conocidas en el mundo de las apuestas por ser fuertemente adictivas y donde las personas pierden más dinero. Con el fin de que estas personas pierdan lo menos posible se estudiará la eficacia de distintas estrategias de juego. A este problema se lo conoce como ["Bandido Multibrazo"](https://es.wikipedia.org/wiki/Bandido_multibrazo) (*Multi-armed bandit*).
 
 La principal incógnita se encuentra en descubrir hasta que punto conviene "explotar" por sobre "explorar" o viceversa. Donde explotar refiere a dar prioridad a elegir lo que uno sabe o cree que sabe que funciona, mientras que explorar refiere a ser propenso a salir de la "zona de confort" y buscar nuevas alternativas.
 
@@ -308,7 +308,7 @@ salida$grafico_ganancias_acumuladas
 Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
 
 ```{r al azar grafico_barplot}
-#| fig-cap: "Frecuencia, éxito y fracaso para cada máquina durante un año con la estrategia al azar."
+#| fig-cap: "Éxitos y fracasos para cada máquina durante un año con la estrategia al azar."
 
 salida$grafico_barplot
 
@@ -410,7 +410,7 @@ salida$grafico_ganancias_acumuladas
 Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
 
 ```{r gcto grafico_barplot}
-#| fig-cap: "Frecuencia, éxito y fracaso para cada máquina durante un año con la estrategia greedy con tasa observada."
+#| fig-cap: "Éxitos y fracasos para cada máquina durante un año con la estrategia al azar."
 
 salida$grafico_barplot
 
@@ -513,7 +513,7 @@ salida$grafico_ganancias_acumuladas
 Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
 
 ```{r gcpp grafico_barplot}
-#| fig-cap: "Frecuencia, éxito y fracaso para cada máquina durante un año con la estrategia greedy con probabilidad a posteriori."
+#| fig-cap: "Éxitos y fracasos para cada máquina durante un año con la estrategia al azar."
 
 salida$grafico_barplot
 
@@ -659,7 +659,7 @@ salida$grafico_ganancias_acumuladas
 Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
 
 ```{r e_greedy grafico_barplot}
-#| fig-cap: "Frecuencia, éxito y fracaso para cada máquina durante un año con la estrategia e-greedy."
+#| fig-cap: "Éxitos y fracasos para cada máquina durante un año con la estrategia al azar."
 
 salida$grafico_barplot
 
@@ -812,7 +812,7 @@ salida$grafico_ganancias_acumuladas
 Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
 
 ```{r softmax grafico_barplot}
-#| fig-cap: "Frecuencia, éxito y fracaso para cada máquina durante un año con la estrategia softmax."
+#| fig-cap: "Éxitos y fracasos para cada máquina durante un año con la estrategia al azar."
 
 salida$grafico_barplot
 
@@ -917,7 +917,7 @@ salida$grafico_ganancias_acumuladas
 Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
 
 ```{r upper-bound grafico_barplot}
-#| fig-cap: "Frecuencia, éxito y fracaso para cada máquina durante un año con la estrategia upper-bound."
+#| fig-cap: "Éxitos y fracasos para cada máquina durante un año con la estrategia al azar."
 
 salida$grafico_barplot
 
@@ -1016,7 +1016,7 @@ salida$grafico_ganancias_acumuladas
 Se observa que se ganaron `r max(salida$ganancias_acumuladas)` unidades monetarias en el año.
 
 ```{r thompson grafico_barplot}
-#| fig-cap: "Frecuencia, éxito y fracaso para cada máquina durante un año con la estrategia Thompson."
+#| fig-cap: "Éxitos y fracasos para cada máquina durante un año con la estrategia al azar."
 
 salida$grafico_barplot
 
@@ -1040,7 +1040,7 @@ Ventajas de la estrategia:
 
   - Utiliza la información de las tiradas anteriores.
   
-  - A pesar de que la tasa de éxito de una máquina sea mucho mayor que las demás, al estar generando valores aleatorios siempre existe la posibilidad de seguir explotando, aunque sea más probable explotar
+  - A pesar de que la tasa de éxito de una máquina sea mucho mayor que las demás, al estar generando valores aleatorios siempre existe la posibilidad de seguir explotando, aunque sea más probable explotar.
 
 Desventajas de la estrategia:
 
