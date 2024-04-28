@@ -1117,4 +1117,4 @@ Si bien el presente estudio no busca generar la falsa ilusión de que es posible
 
 # Anexo
 
-Se pueden replicar los resultados y comprobar los códigos utilizados consultando el [repositorio](https://github.com/andres-roncaglia/tp1-bayes) del trabajo.
+Se pueden replicar los resultados y comprobar los códigos utilizados consultando el [repositorio](https://github.com/andres-roncaglia/Multi_Armed_Bandit) del trabajo.
