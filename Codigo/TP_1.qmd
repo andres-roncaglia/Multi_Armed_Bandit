@@ -35,7 +35,7 @@ theme_set(theme_bw())
 \vspace{3cm}
 
 ```{r logo facultad, echo=F, include = T, out.width= "60%"}
-knitr::include_graphics("logounr.png")
+knitr::include_graphics("../Figuras/logounr.png")
 ```
 
 \pagenumbering{gobble}
@@ -271,7 +271,7 @@ Consiste en elegir cada día una máquina al azar sin importar los resultados qu
 Para elegir la máquina con la que se va a jugar en el día se hizo uso de la siguiente función:
 
 ```{r cargamos las funciones}
-source("Estrategias_y_simulacion.R")
+source("../Funciones/Estrategias_y_simulacion.R")
 ```
 
 ::: callout-note
@@ -1082,7 +1082,7 @@ mean(estrategias_final[,3]>estrategias_final[,6])
 ```
 
 ```{r carga de simulacion final}
-load("simulacion_final.RData")
+load("../Funciones/simulacion_final.RData")
 ```
 
 ```{r Boxplots comparaciones}
